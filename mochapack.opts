@@ -1,4 +1,0 @@
---colors
---reporter spec
---webpack-config webpack.config.test.js
-test/*.test.js
