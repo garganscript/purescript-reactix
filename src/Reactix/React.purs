@@ -1,34 +1,35 @@
 module Reactix.React
-  ( Element, cloneElement
+  ( Element, cloneElement, createDOMElement
   , Children, children
-  , Hooks, runHooks
+  , class MonadHooks, runHooks
   , Context, ContextProvider, ContextConsumer, createContext, provider, consumer
 
-  , class Component
+  , Component
 
-  , class LeafComponent
-  , Leaf, createLeaf
-  , MemoLeaf, memoLeaf, memoLeaf'
+  -- , class LeafComponent
+  -- , Leaf, createLeaf
+  -- , MemoLeaf, memoLeaf, memoLeaf'
 
-  , class TreeComponent
-  , Tree, createTree
+  -- , class TreeComponent
+  -- , Tree, createTree
+  -- , MemoTree, memoTree, memoTree'
 
   , fragment
-  , MemoTree, memoTree, memoTree'
 
   , DOMElement
   , NullableRef, createRef
 
-  , class Read, read
-  , class Write, write
+  -- , class Read, read
+  -- , class Write, write
   )
  where
 
 import Prelude
-import Data.Function.Uncurried (Fn2, runFn2, Fn3, runFn3)
+import Data.Function.Uncurried (Fn2, runFn2, mkFn2, Fn3, runFn3)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
 import Effect (Effect)
+import Effect.Unsafe (unsafePerformEffect)
 import Unsafe.Coerce (unsafeCoerce)
 import Prim.Row (class Lacks)
 
@@ -46,139 +47,87 @@ foreign import data DOMElement :: Type
 -- | A convenience for adding `children` to a list of props
 type WithChildren p = ( children :: Children | p )
 
--- polymorphism
+-- | This is to hide that it's actually implemented with Effect
+class Monad m <= MonadHooks m where
+  runHooks :: forall a. m a -> a
 
-class Component c (p :: # Type) | c -> p
+instance monadHooksEffect :: MonadHooks Effect where
+  runHooks = unsafePerformEffect
+  
+class Childless (props :: # Type)
 
--- | Components which do not have children
-class Component c p <= LeafComponent c (p :: # Type) | c -> p
+instance childlessLacksChildren :: Lacks "children" props => Childless props
 
--- | Components which may have children
-class Component c p <= TreeComponent c (p :: # Type) | c -> p
+newtype Component p = Component (Record p -> Element)
+
+-- instance createElementFnComponent :: CreateElement (FunctionComponent p) p
 
 -- | Things which can be read purely
 class Read r v where
   read :: r -> v
 
--- | Things which can be written in Effect
-class Write w v where
-  write :: w -> v -> Effect Unit
-
--- Leaves and trees
-
--- | A component which does not accept children
-newtype Leaf props = Leaf (Record props -> Element)
-
-instance componentLeaf :: Component (Leaf p) p
-instance leafComponentLeaf :: LeafComponent (Leaf p) p
-
--- | A component which accepts children
-newtype Tree props = Tree (Record (WithChildren props) -> Element)
-
-instance componentTree :: Component (Tree p) p
-instance treeComponentTree :: TreeComponent (Tree p) p
-
-
-
--- Memoised leaves and trees
-
--- | A memoised Leaf
-foreign import data MemoLeaf :: # Type -> Type
-
-instance componentMemoLeaf :: Component (MemoLeaf p) p
-instance leafComponentMemoLeaf :: LeafComponent (MemoLeaf p) p
-
--- | A memoised Tree
-foreign import data MemoTree :: # Type -> Type
-
-instance componentMemoTree :: Component (MemoTree p) p
-instance treeComponentMemoTree :: TreeComponent (MemoTree p) p
-
-
-
-
-
--- Hooks
-
--- | The Hooks monad. We suspect it is the Identity monad in disguise
-newtype Hooks a = Hooks (Unit -> a)
-
--- | Sequences a Hooks computation and returns the result
--- | Warning: must not be used outside of a react component
--- | `hooksLeaf` and `hooksTree` handle this for you, prefer them.
-runHooks :: forall a. Hooks a -> a
-runHooks (Hooks a) = a unit
-
-instance functorHooks :: Functor Hooks where
-  map f (Hooks a) = Hooks (\_ -> f (a unit))
-
-instance applyHooks :: Apply Hooks where
-  apply (Hooks f) (Hooks a) = Hooks (\_ -> (f unit) (a unit))
-
-instance applicativeHooks :: Applicative Hooks where
-  pure a = Hooks (\_ -> a)
-
-instance bindHooks :: Bind Hooks where
-  bind (Hooks a) f = f (a unit)
-
-instance monadHooks :: Monad Hooks
-
-
-
+foreign import data Memo :: # Type -> Type
 
 -- Component building
 
 -- | Creates a pure leaf component from a function
 pureLeaf ::
-  forall props. Lacks "children" props
+  forall props. Childless props
   => (Record props -> Element)
-  -> Leaf props
-pureLeaf = Leaf
+  -> Component props
+pureLeaf = Component
 
 -- | Creates a pure tree component from a function
 pureTree ::
-  forall props. Lacks "children" props
-  => (Record props -> Children -> Element)
-  -> Tree props
-pureTree c = Tree $ \props -> c (unsafeCoerce props) props.children
+  forall props. Childless props
+  => (Record props -> Array Element -> Element)
+  -> Component (WithChildren props)
+pureTree c = Component $ \props -> c (unsafeCoerce props) (children props.children)
 
 -- | Creates a hooks leaf component from a function
 hooksLeaf ::
-  forall props. Lacks "children" props
-  => (Record props -> Hooks Element)
-  -> Leaf props
+  forall props m.
+     MonadHooks m
+  => Childless props
+  => (Record props -> m Element)
+  -> Component props
 hooksLeaf c = pureLeaf (runHooks <<< c)
 
 hooksTree ::
-  forall props. Lacks "children" props
-  => (Record props -> Children -> Hooks Element)
-  -> Tree props
-hooksTree c = Tree $ \props -> runHooks $ c (unsafeCoerce props) props.children
-
-
-
+  forall props m.
+     MonadHooks m
+  => Childless props
+  => (Record props -> Array Element -> m Element)
+  -> Component (WithChildren props)
+hooksTree c = Component $ \props -> runHooks $ c (unsafeCoerce props) (children props.children)
 
 
 -- element creation
 
+-- | Creates a DOM element of the given tag
+createDOMElement :: forall props. String -> Record props -> Array Element -> Element
+createDOMElement = runFn3 _createElement
+
 -- | Creates a leaf component from a props Record
 createLeaf ::
-  forall tree props. Lacks "children" props
-  => LeafComponent tree props
-  => tree
+  forall tree props.
+     Childless props
+  => Component props
   -> Record props
   -> Element
 createLeaf c p = runFn3 _createElement c p []
 
 -- | Creates a tree component from a props Record and an Array of children
 createTree ::
-  forall tree props. Lacks "children" props
-  => TreeComponent tree props
-  => tree
+  forall props.
+     Childless props
+  => Component (WithChildren props)
   -> Record props
   -> Array Element
   -> Element
 createTree = runFn3 _createElement
+
+-- createElement :: forall c p. CreateElement c p => c -> p -> Array Element ->
 
 foreign import _createElement :: forall c p cs e. Fn3 c p cs e
 
@@ -209,31 +158,15 @@ instance semigroupElement :: Semigroup Element where
 
 -- Memoisation
 
-memoLeaf ::
-  forall props. Lacks "children" props
-  => Leaf props
+memo ::
+  forall props.
+     Component props
   -> (Record props -> Record props -> Boolean)
-  -> MemoLeaf props
-memoLeaf (Leaf l) = runFn2 _memo l
+  -> Memo props
+memo c f = runFn2 _memo c (mkFn2 f)
 
-memoLeaf' ::
-  forall props. Lacks "children" props
-  => Leaf props
-  -> MemoLeaf props
-memoLeaf' (Leaf l) = _memoPrime l
-
-memoTree ::
-  forall props. Lacks "children" props
-  => Tree props
-  -> (Record (WithChildren props) -> Record (WithChildren props) -> Boolean)
-  -> MemoTree props
-memoTree (Tree t) = runFn2 _memo t
-
-memoTree' ::
-  forall props. Lacks "children" props
-  => Tree props
-  -> MemoTree props
-memoTree' (Tree t) = _memoPrime t
+memo' :: forall props. Component props -> Memo props
+memo' = _memoPrime
 
 foreign import _memo :: forall c f r. Fn2 c f r
 foreign import _memoPrime :: forall c r. c -> r

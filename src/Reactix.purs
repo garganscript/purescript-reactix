@@ -6,4 +6,4 @@ module Reactix
 
 import Reactix.React
 import Reactix.Hooks
-import Reactix.Mount
+import Reactix.Mount (findElementBySelector, render)
