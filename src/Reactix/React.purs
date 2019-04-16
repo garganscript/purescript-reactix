@@ -1,18 +1,12 @@
 module Reactix.React
   ( Element, cloneElement, createDOMElement
   , Children, children
+  , class Childless
   , class MonadHooks, runHooks
   , Context, ContextProvider, ContextConsumer, createContext, provider, consumer
 
   , Component
-
-  -- , class LeafComponent
-  -- , Leaf, createLeaf
-  -- , MemoLeaf, memoLeaf, memoLeaf'
-
-  -- , class TreeComponent
-  -- , Tree, createTree
-  -- , MemoTree, memoTree, memoTree'
+  , pureLeaf, pureTree, hooksLeaf, hooksTree
 
   , fragment
 
@@ -29,6 +23,7 @@ import Data.Function.Uncurried (Fn2, runFn2, mkFn2, Fn3, runFn3)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
 import Effect (Effect)
+import Effect.Uncurried (EffectFn1, mkEffectFn1)
 import Effect.Unsafe (unsafePerformEffect)
 import Unsafe.Coerce (unsafeCoerce)
 import Prim.Row (class Lacks)
@@ -49,16 +44,16 @@ type WithChildren p = ( children :: Children | p )
 
 -- | This is to hide that it's actually implemented with Effect
 class Monad m <= MonadHooks m where
-  runHooks :: forall a. m a -> a
+  runHooks :: forall a. m a -> Effect a
 
 instance monadHooksEffect :: MonadHooks Effect where
-  runHooks = unsafePerformEffect
+  runHooks = identity
   
 class Childless (props :: # Type)
 
 instance childlessLacksChildren :: Lacks "children" props => Childless props
 
-newtype Component p = Component (Record p -> Element)
+newtype Component p = Component (EffectFn1 (Record p) Element)
 
 -- instance createElementFnComponent :: CreateElement (FunctionComponent p) p
 
@@ -75,14 +70,17 @@ pureLeaf ::
   forall props. Childless props
   => (Record props -> Element)
   -> Component props
-pureLeaf = Component
+pureLeaf f = Component (mkEffectFn1 $ pure <<< f)
 
 -- | Creates a pure tree component from a function
 pureTree ::
   forall props. Childless props
   => (Record props -> Array Element -> Element)
   -> Component (WithChildren props)
-pureTree c = Component $ \props -> c (unsafeCoerce props) (children props.children)
+pureTree c = Component $ mkEffectFn1 c' 
+  where
+    c' :: Record (WithChildren props) -> Effect Element
+    c' props = pure $ c (unsafeCoerce props) (children props.children)
 
 -- | Creates a hooks leaf component from a function
 hooksLeaf ::
@@ -91,7 +89,7 @@ hooksLeaf ::
   => Childless props
   => (Record props -> m Element)
   -> Component props
-hooksLeaf c = pureLeaf (runHooks <<< c)
+hooksLeaf c = Component (mkEffectFn1 $ runHooks <<< c)
 
 hooksTree ::
   forall props m.
@@ -99,7 +97,10 @@ hooksTree ::
   => Childless props
   => (Record props -> Array Element -> m Element)
   -> Component (WithChildren props)
-hooksTree c = Component $ \props -> runHooks $ c (unsafeCoerce props) (children props.children)
+hooksTree c = Component $ mkEffectFn1 c'
+  where
+    c' :: Record (WithChildren props) -> Effect Element
+    c' props = runHooks $ c (unsafeCoerce props) (children props.children)
 
 
 -- element creation
