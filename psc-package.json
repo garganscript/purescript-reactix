@@ -1,0 +1,17 @@
+{
+  "name": "reactix",
+  "set": "local",
+  "source": ".psc-package",
+  "depends":
+    [ "console"
+    , "effect"
+    , "functions"
+    , "newtype"
+    , "nullable"
+    , "prelude"
+    , "spec"
+    , "spec-mocha"
+    , "unsafe-coerce"
+    , "web-dom"
+    , "web-html" ]
+}
