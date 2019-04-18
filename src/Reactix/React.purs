@@ -74,7 +74,7 @@ pureLeaf ::
   => String
   -> (Record props -> Element)
   -> Component props
-pureLeaf name f = named named $ Component (mkEffectFn1 $ pure <<< f)
+pureLeaf name f = named name $ Component (mkEffectFn1 $ pure <<< f)
 
 -- | Creates a pure tree component from a function
 pureTree ::

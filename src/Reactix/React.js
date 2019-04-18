@@ -47,4 +47,4 @@ exports._createContext = function(ctor, val) {
 
 exports._render = function(a,b) { return react_dom.render(a,b); };
 
-exports._named = function(name, f) { f.name = name; return f; };
+exports._named = function(name, f) { Object.defineProperty(f, 'name', {value: name, writable: false}); return f; };

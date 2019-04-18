@@ -46,7 +46,7 @@ staticTest =
 type CounterProps = ( count :: Int )
 
 counterCpt :: R.Component CounterProps
-counterCpt = R.hooksLeaf cpt
+counterCpt = R.hooksLeaf "Counter" cpt
   where
     cpt :: forall m. R.MonadHooks m => Record CounterProps -> m R.Element
     cpt {count} = do
