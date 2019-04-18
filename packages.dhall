@@ -117,7 +117,13 @@ let upstream =
 let overrides = {=}
 
 let additions =
-      { spec-mocha =
+      { dom-simple =
+          mkPackage
+		  [ "console", "effect", "functions", "nullable", "prelude"
+		  , "spec", "spec-mocha", "unsafe-coerce" ]
+		  "https://github.com/irresponsible/purescript-dom-simple"
+		  "master"
+      , spec-mocha =
 	      mkPackage
 		  [ "console", "foldable-traversable", "exceptions", "spec" ]
 		  "https://github.com/purescript-spec/purescript-spec-mocha"
@@ -127,11 +133,6 @@ let additions =
       --     [ "prelude", "aff", "random", "quickcheck", "spec" ]
       --     "https://github.com/purescript-spec/purescript-spec-quickcheck"
       --     "v3.1.0"
-      , undefinable =
-          mkPackage
-          [ "functions", "maybe" ]
-          "https://github.com/ethul/purescript-undefinable.git"
-          "v4.0.0"
       }
 
 in  upstream // overrides // additions
