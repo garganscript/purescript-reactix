@@ -1,6 +1,6 @@
 module Reactix.DOM.Raw
   (LeafFactory, TreeFactory
-  , div, div', i, i', button
+  , button, div, div', i, i', p, p'
   , text) where
 
 import Reactix.React (Element, createDOMElement)
@@ -14,6 +14,9 @@ type LeafFactory = forall props. Record props -> Element
 
 -- A factory function for a DOM element with children
 type TreeFactory = forall props. Record props -> Array Element -> Element
+
+text :: String -> Element
+text = unsafeCoerce
 
 button :: TreeFactory
 button = createDOMElement "button"
@@ -30,6 +33,9 @@ i = createDOMElement "i"
 i' :: LeafFactory
 i' = createLeafDOMElement "i"
 
-text :: String -> Element
-text = unsafeCoerce
 
+p :: TreeFactory
+p = createDOMElement "p"
+
+p' :: LeafFactory
+p' = createLeafDOMElement "p"
