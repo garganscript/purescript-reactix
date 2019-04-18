@@ -1,6 +1,6 @@
 module Reactix.DOM.Raw
   (LeafFactory, TreeFactory
-  , button, div, div', i, i', p, p'
+  , button, div, div', i, i', p, p', span, span'
   , text) where
 
 import Reactix.React (Element, createDOMElement)
@@ -33,9 +33,15 @@ i = createDOMElement "i"
 i' :: LeafFactory
 i' = createLeafDOMElement "i"
 
-
 p :: TreeFactory
 p = createDOMElement "p"
 
 p' :: LeafFactory
 p' = createLeafDOMElement "p"
+
+span :: TreeFactory
+span = createDOMElement "span"
+
+span' :: LeafFactory
+span' = createLeafDOMElement "span"
+
