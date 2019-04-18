@@ -50,7 +50,7 @@ class Monad m <= MonadHooks m where
   unsafeHooksEffect :: forall a. Effect a -> m a
 
 instance monadHooksEffect :: MonadHooks Effect where
-  unsafeHooksEffect = identity
+  unsafeHooksEffect = unsafeCoerce
   
 class Childless (props :: # Type)
 
