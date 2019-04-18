@@ -1,5 +1,7 @@
 'use strict';
+
 var React = require("react");
+var react_dom = require('react-dom');
 
 function _simple(prop) {
   return function() { return React[prop].apply(React, arguments); };
@@ -31,7 +33,7 @@ function _createElement(elem, props, children) {
 
 exports._createElement = _createElement;
 exports._createFragment = function(children) {
-  return _createElement(React.fragment, {}, children);
+  return _createElement(React.Fragment, {}, children);
 };
 
 exports._contextProvider = function(c) { return c.Provider; };
@@ -43,3 +45,4 @@ exports._createContext = function(ctor, val) {
   return {provider: c.Provider, consumer: c.Consumer, context: c};
 };
 
+exports._render = function(a,b) { return react_dom.render(a,b); };

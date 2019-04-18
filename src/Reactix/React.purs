@@ -2,31 +2,36 @@ module Reactix.React
   ( Element, cloneElement, createDOMElement
   , Children, children
   , class Childless
-  , class MonadHooks, runHooks
+  , class MonadHooks, unsafeHooksEffect
   , Context, ContextProvider, ContextConsumer, createContext, provider, consumer
 
+  , render
+  
   , Component
   , pureLeaf, pureTree, hooksLeaf, hooksTree
-
+  , class Componentesque
+  , createLeaf, createTree
   , fragment
 
-  , DOMElement
   , NullableRef, createRef
 
-  -- , class Read, read
-  -- , class Write, write
+  , isValid
+
+  , Memo
+  , memo, memo'
   )
  where
 
 import Prelude
-import Data.Function.Uncurried (Fn2, runFn2, mkFn2, Fn3, runFn3)
-import Data.Maybe (Maybe)
-import Data.Nullable (Nullable, toMaybe)
-import Effect (Effect)
-import Effect.Uncurried (EffectFn1, mkEffectFn1)
-import Effect.Unsafe (unsafePerformEffect)
+import Data.Function.Uncurried ( Fn2, runFn2, mkFn2, Fn3, runFn3 )
+import Data.Maybe ( Maybe )
+import Data.Nullable ( Nullable, toMaybe )
+import Effect ( Effect )
+import Effect.Class ( class MonadEffect, liftEffect )
+import Effect.Uncurried (EffectFn1, mkEffectFn1, EffectFn2, runEffectFn2)
 import Unsafe.Coerce (unsafeCoerce)
 import Prim.Row (class Lacks)
+import DOM.Simple as DOM
 
 -- basic types
 
@@ -36,32 +41,30 @@ foreign import data Element :: Type
 -- | A wrapper over an Array of Elements
 foreign import data Children :: Type
 
--- | A live DOM element rendered in the browser
-foreign import data DOMElement :: Type
 
 -- | A convenience for adding `children` to a list of props
 type WithChildren p = ( children :: Children | p )
 
 -- | This is to hide that it's actually implemented with Effect
 class Monad m <= MonadHooks m where
-  runHooks :: forall a. m a -> Effect a
+  unsafeHooksEffect :: forall a. Effect a -> m a
 
 instance monadHooksEffect :: MonadHooks Effect where
-  runHooks = identity
+  unsafeHooksEffect = identity
   
 class Childless (props :: # Type)
 
 instance childlessLacksChildren :: Lacks "children" props => Childless props
 
+class Componentesque (c :: # Type -> Type)
+
 newtype Component p = Component (EffectFn1 (Record p) Element)
 
--- instance createElementFnComponent :: CreateElement (FunctionComponent p) p
-
--- | Things which can be read purely
-class Read r v where
-  read :: r -> v
+instance componentesqueComponent :: Componentesque Component
 
 foreign import data Memo :: # Type -> Type
+
+instance componentesqueMemo :: Componentesque Memo
 
 -- Component building
 
@@ -84,23 +87,22 @@ pureTree c = Component $ mkEffectFn1 c'
 
 -- | Creates a hooks leaf component from a function
 hooksLeaf ::
-  forall props m.
-     MonadHooks m
-  => Childless props
-  => (Record props -> m Element)
+  forall props. Childless props
+  => (forall m. MonadHooks m => Record props -> m Element)
   -> Component props
-hooksLeaf c = Component (mkEffectFn1 $ runHooks <<< c)
+hooksLeaf c = Component (mkEffectFn1 c)
 
 hooksTree ::
-  forall props m.
-     MonadHooks m
-  => Childless props
-  => (Record props -> Array Element -> m Element)
+  forall props. Childless props
+  => (forall m. MonadHooks m
+      => Record props
+      -> Array Element
+      -> m Element)
   -> Component (WithChildren props)
 hooksTree c = Component $ mkEffectFn1 c'
   where
     c' :: Record (WithChildren props) -> Effect Element
-    c' props = runHooks $ c (unsafeCoerce props) (children props.children)
+    c' props = c (unsafeCoerce props) (children props.children)
 
 
 -- element creation
@@ -111,18 +113,20 @@ createDOMElement = runFn3 _createElement
 
 -- | Creates a leaf component from a props Record
 createLeaf ::
-  forall tree props.
+  forall props cpt.
      Childless props
-  => Component props
+  => Componentesque cpt
+  => cpt props
   -> Record props
   -> Element
 createLeaf c p = runFn3 _createElement c p []
 
 -- | Creates a tree component from a props Record and an Array of children
 createTree ::
-  forall props.
+  forall props cpt.
      Childless props
-  => Component (WithChildren props)
+  => Componentesque cpt
+  => cpt (WithChildren props)
   -> Record props
   -> Array Element
   -> Element
@@ -154,7 +158,11 @@ foreign import _createFragment :: Array Element -> Element
 instance semigroupElement :: Semigroup Element where
   append a b = fragment [a, b]
 
+-- | Renders a React Element to a real Element
+render :: forall m. MonadEffect m => MonadHooks m => Element -> DOM.Element -> m Unit
+render e d = liftEffect (runEffectFn2 _render e d)
 
+foreign import _render :: EffectFn2 Element DOM.Element Unit
 
 
 -- Memoisation
@@ -222,8 +230,8 @@ createRef = _createRef
 
 foreign import _deref :: forall r. NullableRef r -> Nullable r
 
-instance readNullableRef :: Read (NullableRef r) (Maybe r) where
-  read = toMaybe <<< _deref
+readNullableRef :: forall r. NullableRef r -> Maybe r
+readNullableRef = toMaybe <<< _deref
 
 
 -- Ref Forwarding
@@ -234,4 +242,7 @@ instance readNullableRef :: Read (NullableRef r) (Maybe r) where
 
 -- foreign import _forwardRef :: forall r p. (Fn2 p r Element) -> Forwarded p
 
+foreign import _isValid :: forall a. a -> Boolean
 
+isValid :: forall a. a -> Boolean
+isValid = _isValid

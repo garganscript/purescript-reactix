@@ -4,30 +4,12 @@ var React = require("react");
 function _simple(prop) {
   return function() { return React[prop].apply(React, arguments); };
 }
-
-exports._useContext = _simple('useContext');
-exports._useDebugValue = _simple('useDebugValue');
-exports._useDebugValuePrime = _simple('useDebugValue');
-// exports._useImperativeHandle = _simple('useImperativeHandle');
-
-exports._useState = function(init) {
-  const r = React.useState(init);
-  const set = function(s) { r[1](s); };
-  return { value: r[0], set: set };
-};
-
-exports._call1 = function(state, value) { state[1](value); };
-exports._read0 = function(state) { return state[0]; };
-
-exports._useReducer = _simple('useReducer');
-
-exports._useRef = function(value) {
-  const r = React.useRef(value);
-  return { value: r.current, set: function(v) { r.current = v; } };
-};
-exports._readCurrent = function(v) { return v.current; };
-exports._writeCurrent = function(v,w) { v.current = w; };
-
+function _tuple(prop) {
+  return function(ctor) {
+    const r = React[prop].apply(React, Array.prototype.slice.call(arguments, 1));
+    return ctor(r[0])(r[1]);
+  }
+}
 function _memo(prop) {
   return function() {
     var args = Array.prototype.slice.call(arguments);
@@ -35,6 +17,22 @@ function _memo(prop) {
     return React[prop].apply(React, args);
   }
 }
+
+exports._useContext = _simple('useContext');
+exports._useDebugValue = _simple('useDebugValue');
+exports._useDebugValuePrime = _simple('useDebugValue');
+// exports._useImperativeHandle = _simple('useImperativeHandle');
+
+exports._useState = _tuple('useState');
+
+exports._useReducer = _tuple('useReducer');
+
+exports._useRef = function(ctor, value) {
+  const r = React.useRef(value);
+  const set = function(v) { r.current = v; };
+  return ctor(r.current)(set);
+};
+
 exports._useMemo = _simple('useMemo');
 exports._useMemo1 = _memo('useMemo');
 exports._useMemo2 = _memo('useMemo');
