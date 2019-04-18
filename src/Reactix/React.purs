@@ -71,16 +71,18 @@ instance componentesqueMemo :: Componentesque Memo
 -- | Creates a pure leaf component from a function
 pureLeaf ::
   forall props. Childless props
-  => (Record props -> Element)
+  => String
+  -> (Record props -> Element)
   -> Component props
-pureLeaf f = Component (mkEffectFn1 $ pure <<< f)
+pureLeaf name f = named named $ Component (mkEffectFn1 $ pure <<< f)
 
 -- | Creates a pure tree component from a function
 pureTree ::
   forall props. Childless props
-  => (Record props -> Array Element -> Element)
+  => String
+  -> (Record props -> Array Element -> Element)
   -> Component (WithChildren props)
-pureTree c = Component $ mkEffectFn1 c' 
+pureTree name c = named name $ Component $ mkEffectFn1 c' 
   where
     c' :: Record (WithChildren props) -> Effect Element
     c' props = pure $ c (unsafeCoerce props) (children props.children)
@@ -88,18 +90,20 @@ pureTree c = Component $ mkEffectFn1 c'
 -- | Creates a hooks leaf component from a function
 hooksLeaf ::
   forall props. Childless props
-  => (forall m. MonadHooks m => Record props -> m Element)
+  => String
+  -> (forall m. MonadHooks m => Record props -> m Element)
   -> Component props
-hooksLeaf c = Component (mkEffectFn1 c)
+hooksLeaf name c = named name $ Component (mkEffectFn1 c)
 
 hooksTree ::
   forall props. Childless props
-  => (forall m. MonadHooks m
+  => String
+  -> (forall m. MonadHooks m
       => Record props
       -> Array Element
       -> m Element)
   -> Component (WithChildren props)
-hooksTree c = Component $ mkEffectFn1 c'
+hooksTree name c = named name $ Component $ mkEffectFn1 c'
   where
     c' :: Record (WithChildren props) -> Effect Element
     c' props = c (unsafeCoerce props) (children props.children)
@@ -191,8 +195,6 @@ children = _children
 
 
 
-
-
 -- Context
 
 -- | A React Context
@@ -241,6 +243,11 @@ readNullableRef = toMaybe <<< _deref
 -- foreign import data Forwarded :: Type -> Type
 
 -- foreign import _forwardRef :: forall r p. (Fn2 p r Element) -> Forwarded p
+
+named :: forall c. String -> c -> c
+named = runFn2 named
+
+foreign import _named :: forall c. Fn2 String c c
 
 foreign import _isValid :: forall a. a -> Boolean
 
