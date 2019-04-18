@@ -245,7 +245,7 @@ readNullableRef = toMaybe <<< _deref
 -- foreign import _forwardRef :: forall r p. (Fn2 p r Element) -> Forwarded p
 
 named :: forall c. String -> c -> c
-named = runFn2 named
+named = runFn2 _named
 
 foreign import _named :: forall c. Fn2 String c c
 
