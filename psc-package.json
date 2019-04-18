@@ -4,6 +4,7 @@
   "source": ".psc-package",
   "depends":
     [ "console"
+    , "dom-simple"
     , "effect"
     , "functions"
     , "newtype"
@@ -11,7 +12,5 @@
     , "prelude"
     , "spec"
     , "spec-mocha"
-    , "unsafe-coerce"
-    , "web-dom"
-    , "web-html" ]
+    , "unsafe-coerce" ]
 }
