@@ -1,8 +1,4 @@
-module Reactix.DOM.Raw
-  (LeafFactory, ElementFactory
-  , button, div, div', hr
-  , i, i', p, p', span, span'
-  , text) where
+module Reactix.DOM.Raw where
 
 import Reactix.React (Element, createElement)
 import Unsafe.Coerce (unsafeCoerce)
@@ -18,6 +14,9 @@ type ElementFactory = forall props. Record props -> Array Element -> Element
 
 text :: String -> Element
 text = unsafeCoerce
+
+a :: ElementFactory
+a = createElement "a"
 
 button :: ElementFactory
 button = createElement "button"
@@ -37,6 +36,12 @@ i = createElement "i"
 i' :: LeafFactory
 i' = createLeafElement "i"
 
+li :: ElementFactory
+li = createElement "li"
+
+nav :: ElementFactory
+nav = createElement "nav"
+
 p :: ElementFactory
 p = createElement "p"
 
@@ -49,3 +54,5 @@ span = createElement "span"
 span' :: LeafFactory
 span' = createLeafElement "span"
 
+ul :: ElementFactory
+ul = createElement "ul"
