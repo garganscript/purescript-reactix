@@ -8,7 +8,7 @@ module Reactix.Hooks
   -- , useReducer, useReducer'
   -- , useContext
   -- , useMemo, useMemo1, useMemo2 --, useMemo3, useMemo4, useMemo5
-  , Ref, useRef
+  , Ref, useRef, readRef, setRef
   -- , useDebugValue, useDebugValue'
   -- , useImperativeHandle
   )
@@ -19,7 +19,7 @@ import Data.Function.Uncurried ( Fn2, mkFn2, runFn2 )
 import Data.Tuple ( Tuple(..) )
 import Effect ( Effect )
 import Effect.Uncurried ( EffectFn1, runEffectFn1, EffectFn2, runEffectFn2, EffectFn3, runEffectFn3, EffectFn4, runEffectFn4, EffectFn5, runEffectFn5, EffectFn6, runEffectFn6 )
-import FFI.Simple ( (...), delay, args2, args3, args4, args5 )
+import FFI.Simple ( (...), (..), delay, args2, args3, args4, args5, setProperty )
 import DOM.Simple.Console 
 
 import Reactix.React ( Hooks, react, unsafeHooksEffect )
@@ -34,7 +34,7 @@ type State state = Tuple state (state -> Effect Unit)
 
 -- | Given an Effect function returning an initial value, returns a State
 useState :: forall s. (Unit -> Effect s) -> Hooks (State s)
-useState s = hook $ \_ -> pure $ currySecond $ react ... "useState" $ [ delay s ]
+useState s = hook $ \_ -> pure $ currySecond $ tuple $ react ... "useState" $ [ delay s ]
 -- -- useReducer
 
 -- type Reducer state action = Tuple state (EffectFn1 action Unit)
@@ -142,10 +142,19 @@ useLayoutEffect5 a b c d f e = _useLayoutEffect e $ args5 a b c d f
 
 -- useRef
 
-type Ref state = Tuple state (state -> Effect Unit)
+foreign import data Ref :: Type -> Type
 
 useRef :: forall r. r -> Hooks (Ref r)
-useRef r = hook $ \_ -> pure $ currySecond $ tupleCurrent $ react ... "useRef" $ [ r ]
+useRef r = hook $ \_ -> pure $ react ... "useRef" $ [ r ]
+
+readRef :: forall r. Ref r -> r
+readRef r = r .. "current"
+
+setRef :: forall r. Ref r -> r -> Effect Unit
+setRef r v = delay $ \_ -> do
+   _ <- pure $ setProperty "current" r v
+   pure unit
+
 
 -- useContext
 

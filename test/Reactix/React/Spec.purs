@@ -23,8 +23,7 @@ import DOM.Simple.Event as Event
 import Reactix as R
 import Reactix.Test as RT
 import Reactix.DOM.Raw ( button, div, i, text )
-import Reactix.Hooks ( useState, useEffect, useLayoutEffect )
-
+import DOM.Simple.Console
 staticTest :: Spec Unit
 staticTest =
   describe "Basic DOM rendering" $ do
@@ -49,9 +48,9 @@ counterCpt :: R.Component CounterProps
 counterCpt = R.hooksComponent "Counter" cpt
   where
     cpt {count} _ = do
-      y /\ setY <- useState $ \_ -> pure count
+      y /\ setY <- R.useState $ \_ -> pure count
       pure $ div { className: "counter" }
-        [ button { type: "button", onClick: onclick setY (y + 1) } [ text "++" ]
+        [ button { type: "button",  onClick: onclick setY (y + 1) } [ text "++" ]
         , div {} [ text (show y) ] ]
     onclick set to = mkEffectFn1 $ \e -> set to
 
@@ -98,7 +97,7 @@ type EffectorProps = ( stateRef :: Ref.Ref EffectorState )
 effectorCpt :: R.Component EffectorProps
 effectorCpt = R.hooksComponent "Effector" cpt
   where cpt {stateRef} _ = do
-          useEffect $ \_ -> do
+          R.useEffect $ \_ -> do
             Ref.write Initialised stateRef
             pure $ \_ -> Ref.write Done stateRef
           pure $ div {} []
@@ -126,7 +125,7 @@ effectorTest =
 layoutEffectorCpt :: R.Component EffectorProps
 layoutEffectorCpt = R.hooksComponent "LayoutEffector" cpt
   where cpt {stateRef} _ = do
-          useLayoutEffect $ \_ -> do
+          R.useLayoutEffect $ \_ -> do
             Ref.write Initialised stateRef
             pure $ \_ -> Ref.write Done stateRef
           pure $ div {} []
@@ -156,7 +155,7 @@ type ContextProps = ()
 -- contextualCpt :: R.Component ContextProps
 -- contextualCpt = R.hooksComponent "Contextual" cpt
 --   where cpt {stateRef} _ = do
---           useEffect $ \_ -> do
+--           R.useEffect $ \_ -> do
 --             Ref.write Initialised stateRef
 --             pure $ \_ -> Ref.write Done stateRef
 --           pure $ div {} []
