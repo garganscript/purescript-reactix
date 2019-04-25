@@ -30,12 +30,11 @@ import Reactix.React ( Hooks, react, unsafeHooksEffect )
 --- useState
 
 -- | A state hook is a tuple of value and setter
-type State state = Tuple state (EffectFn1 state Unit)
+type State state = Tuple state (state -> Effect Unit)
 
 -- | Given an Effect function returning an initial value, returns a State
 useState :: forall s. (Unit -> Effect s) -> Hooks (State s)
-useState s = hook $ \_ -> pure $ tuple $ react ... "useState" $ [ delay s ]
-
+useState s = hook $ \_ -> pure $ currySecond $ react ... "useState" $ [ delay s ]
 -- -- useReducer
 
 -- type Reducer state action = Tuple state (EffectFn1 action Unit)
@@ -146,8 +145,7 @@ useLayoutEffect5 a b c d f e = _useLayoutEffect e $ args5 a b c d f
 type Ref state = Tuple state (state -> Effect Unit)
 
 useRef :: forall r. r -> Hooks (Ref r)
-useRef r = hook $ \_ -> pure $ friendly $ tupleCurrent $ react ... "useRef" $ [ r ]
-  where friendly (Tuple v s) = Tuple v (runEffectFn1 s)
+useRef r = hook $ \_ -> pure $ currySecond $ tupleCurrent $ react ... "useRef" $ [ r ]
 
 -- useContext
 
@@ -184,6 +182,9 @@ tupleCurrent :: forall a b c. a -> Tuple b c
 tupleCurrent = runFn2 _tupleCurrent Tuple
 
 foreign import _tupleCurrent :: forall a b c. Fn2 (a -> b -> Tuple a b) c (Tuple a b)
+
+currySecond :: forall a b c. Tuple a (EffectFn1 b c) -> Tuple a (b -> Effect c)
+currySecond (Tuple a b) = Tuple a (runEffectFn1 b)
 
 hook :: forall v. (Unit -> Effect v) -> Hooks v
 hook = unsafeHooksEffect <<< delay

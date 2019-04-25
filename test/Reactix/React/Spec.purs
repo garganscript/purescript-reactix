@@ -53,7 +53,7 @@ counterCpt = R.hooksComponent "Counter" cpt
       pure $ div { className: "counter" }
         [ button { type: "button", onClick: onclick setY (y + 1) } [ text "++" ]
         , div {} [ text (show y) ] ]
-    onclick set to = mkEffectFn1 $ \e -> runEffectFn1 set to
+    onclick set to = mkEffectFn1 $ \e -> set to
 
 counterTest :: Spec Unit
 counterTest =
