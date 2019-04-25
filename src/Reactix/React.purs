@@ -1,197 +1,154 @@
 module Reactix.React
-  ( Element, cloneElement, createDOMElement
-  , Children, children
-  , class Childless
-  , class MonadHooks, unsafeHooksEffect
-  , Context, ContextProvider, ContextConsumer, createContext, provider, consumer
+  ( React, react
+  , ReactDOM, reactDOM
+  , Element
+  , Hooks, unsafeHooksEffect, runHooks
 
+  , Context, Provider, Consumer, createContext, provider, consumer, consume
   , render
   
-  , Component
-  , pureLeaf, pureTree, hooksLeaf, hooksTree
-  , class Componentesque
-  , createLeaf, createTree
+  , class IsComponent
+  , Component, createElement
+  , staticComponent, hooksComponent
   , fragment
 
-  , NullableRef, createRef
+  , NullableRef, createRef, readNullableRef
 
   , isValid
 
-  , Memo
-  , memo, memo'
+  , Memo, memo, memo'
   )
  where
 
 import Prelude
-import Data.Function.Uncurried ( Fn2, runFn2, mkFn2, Fn3, runFn3 )
+import Data.Function.Uncurried (mkFn2)
 import Data.Maybe ( Maybe )
 import Data.Nullable ( Nullable, toMaybe )
 import Effect ( Effect )
 import Effect.Class ( class MonadEffect, liftEffect )
-import Effect.Uncurried (EffectFn1, mkEffectFn1, EffectFn2, runEffectFn2)
+import Effect.Uncurried (EffectFn1, mkEffectFn1, EffectFn2)
 import Unsafe.Coerce (unsafeCoerce)
 import Prim.Row (class Lacks)
 import DOM.Simple as DOM
+import FFI.Simple.PseudoArray as PA
+import FFI.Simple ( (..), (...), args2, args3, delay, defineProperty )
+
+foreign import data React :: Type
+foreign import data ReactDOM :: Type
+
+foreign import react :: React
+foreign import reactDOM :: ReactDOM
 
 -- basic types
+
+newtype Component props = Component (EffectFn1 (Record props) Element)
 
 -- | A React Element node
 foreign import data Element :: Type
 
--- | A wrapper over an Array of Elements
-foreign import data Children :: Type
+-- | The Hooks monad
+newtype Hooks a = Hooks (Effect a)
 
+runHooks :: forall a. Hooks a -> Effect a
+runHooks (Hooks a) = a
 
--- | A convenience for adding `children` to a list of props
-type WithChildren p = ( children :: Children | p )
+instance functorHooks :: Functor Hooks where
+  map f (Hooks a) = Hooks (map f a)
 
--- | This is to hide that it's actually implemented with Effect
-class Monad m <= MonadHooks m where
-  unsafeHooksEffect :: forall a. Effect a -> m a
+instance applyHooks :: Apply Hooks where
+  apply (Hooks f) (Hooks a) = Hooks (apply f a)
 
-instance monadHooksEffect :: MonadHooks Effect where
-  unsafeHooksEffect = unsafeCoerce
+instance applicativeHooks :: Applicative Hooks where
+  pure = Hooks <<< pure
+
+instance bindHooks :: Bind Hooks where
+  bind (Hooks a) f = Hooks (a >>= (runHooks <<< f))
+
+instance monadHooks :: Monad Hooks
   
-class Childless (props :: # Type)
+unsafeHooksEffect :: forall a. Effect a -> Hooks a
+unsafeHooksEffect = Hooks
 
-instance childlessLacksChildren :: Lacks "children" props => Childless props
+class IsComponent component (props :: # Type) children
+  | component -> props
+  , component -> children
 
-class Componentesque (c :: # Type -> Type)
+instance componentIsComponent :: IsComponent (Component props) props (Array Element)
+instance memoIsComponent :: IsComponent (Memo props) props (Array Element)
+instance stringIsComponent  :: IsComponent String props (Array Element)
+instance providerIsComponent :: IsComponent (Provider v) (value :: v) (Array Element)
+instance consumerIsComponent :: IsComponent (Consumer v) () (v -> Element)
 
-newtype Component p = Component (EffectFn1 (Record p) Element)
-
-instance componentesqueComponent :: Componentesque Component
-
-foreign import data Memo :: # Type -> Type
-
-instance componentesqueMemo :: Componentesque Memo
+createElement
+  :: forall component props
+  .  IsComponent component props (Array Element)
+  => component -> Record props -> Array Element -> Element
+createElement = rawCreateElement
 
 -- Component building
 
--- | Creates a pure leaf component from a function
-pureLeaf ::
-  forall props. Childless props
-  => String
-  -> (Record props -> Element)
-  -> Component props
-pureLeaf name f = named name $ Component (mkEffectFn1 $ pure <<< f)
+-- | The type of a function that can be turned into a component with
+-- | `staticComponent`. Will not have access to the `Hooks` Monad.
 
--- | Creates a pure tree component from a function
-pureTree ::
-  forall props. Childless props
-  => String
-  -> (Record props -> Array Element -> Element)
-  -> Component (WithChildren props)
-pureTree name c = named name $ Component $ mkEffectFn1 c' 
+type StaticComponent props = Record props -> Array Element -> Element
+
+-- | Turns a `StaticComponent` function into a Component
+staticComponent :: forall props. String -> StaticComponent props -> Component props
+staticComponent name c = Component $ named name $ mkEffectFn1 c' 
   where
-    c' :: Record (WithChildren props) -> Effect Element
-    c' props = pure $ c (unsafeCoerce props) (children props.children)
+    c' :: Record props -> Effect Element
+    c' props = pure $ c props (children props)
 
--- | Creates a hooks leaf component from a function
-hooksLeaf ::
-  forall props. Childless props
-  => String
-  -> (forall m. MonadHooks m => Record props -> m Element)
-  -> Component props
-hooksLeaf name c = named name $ Component (mkEffectFn1 c)
+-- | The type of a function that can be turned into a component with
+-- | `hooksComponent`. Will have access to the `Hooks` Monad.
+type HooksComponent props = Record props -> Array Element -> Hooks Element
 
-hooksTree ::
-  forall props. Childless props
-  => String
-  -> (forall m. MonadHooks m
-      => Record props
-      -> Array Element
-      -> m Element)
-  -> Component (WithChildren props)
-hooksTree name c = named name $ Component $ mkEffectFn1 c'
+-- | Turns a `HooksComponent` function into a Component
+hooksComponent :: forall props. String -> HooksComponent props -> Component props
+hooksComponent name c = Component $ named name $ mkEffectFn1 c'
   where
-    c' :: Record (WithChildren props) -> Effect Element
-    c' props = c (unsafeCoerce props) (children props.children)
+    c' :: Record props -> Effect Element
+    c' props = runHooks $ c props (children props)
 
-
--- element creation
-
--- | Creates a DOM element of the given tag
-createDOMElement :: forall props. String -> Record props -> Array Element -> Element
-createDOMElement = runFn3 _createElement
-
--- | Creates a leaf component from a props Record
-createLeaf ::
-  forall props cpt.
-     Childless props
-  => Componentesque cpt
-  => cpt props
-  -> Record props
-  -> Element
-createLeaf c p = runFn3 _createElement c p []
-
--- | Creates a tree component from a props Record and an Array of children
-createTree ::
-  forall props cpt.
-     Childless props
-  => Componentesque cpt
-  => cpt (WithChildren props)
-  -> Record props
-  -> Array Element
-  -> Element
-createTree = runFn3 _createElement
-
--- createElement :: forall c p. CreateElement c p => c -> p -> Array Element ->
-
-foreign import _createElement :: forall c p cs e. Fn3 c p cs e
-
-
+rawCreateElement :: forall c p cs. c -> p -> Array cs -> Element
+rawCreateElement c p cs = react ... "createElement" $ args
+   where args = PA.unshift c $ PA.unshift p cs
 
 -- Element cloning
 
--- | Clones an element, 
+-- | Clones an element. Quite unsafe because tripping through Element
+-- | loses the type of the props. Be careful.
 
-cloneElement :: forall props. Element -> Record props -> Element
-cloneElement = runFn2 _cloneElement
-
-foreign import _cloneElement :: forall p. Fn2 Element p Element
+-- cloneElement :: forall props. Element -> Record props -> Element
+-- cloneElement e p = react ... "cloneElement" $ args2 e p
 
 -- Fragment creation
 
+-- TODO: add key support
 -- | Combines several elements together
 fragment :: Array Element -> Element
-fragment = _createFragment
-
-foreign import _createFragment :: Array Element -> Element
+fragment es = rawCreateElement (react .. "Fragment") {} es
 
 instance semigroupElement :: Semigroup Element where
   append a b = fragment [a, b]
 
 -- | Renders a React Element to a real Element
-render :: forall m. MonadEffect m => MonadHooks m => Element -> DOM.Element -> m Unit
-render e d = liftEffect (runEffectFn2 _render e d)
+render :: Element -> DOM.Element -> Effect Unit
+render e d = delay \_ -> react ... "render" $ args2 e d
 
-foreign import _render :: EffectFn2 Element DOM.Element Unit
+-- -- Memoisation
 
-
--- Memoisation
+foreign import data Memo :: # Type -> Type
 
 memo ::
   forall props.
      Component props
   -> (Record props -> Record props -> Boolean)
   -> Memo props
-memo c f = runFn2 _memo c (mkFn2 f)
+memo c f = react ... "memo" $ args2 c (mkFn2 f)
 
 memo' :: forall props. Component props -> Memo props
-memo' = _memoPrime
-
-foreign import _memo :: forall c f r. Fn2 c f r
-foreign import _memoPrime :: forall c r. c -> r
-
-
-
--- Children
-
-foreign import _children :: Children -> Array Element
-
-children :: Children -> Array Element
-children = _children
+memo' c = react ... "memo" $ [ c ]
 
 
 
@@ -201,40 +158,34 @@ children = _children
 foreign import data Context :: Type -> Type
 
 -- | The Provider for a React Context
-foreign import data ContextProvider :: Type -> Type
+foreign import data Provider :: Type -> Type
 
 -- | The Consumer for a React Context
-foreign import data ContextConsumer :: Type -> Type
+foreign import data Consumer :: Type -> Type
 
-foreign import _createContext :: forall v. v -> Context v
-foreign import _contextProvider :: forall v. Context v -> ContextProvider v
-foreign import _contextConsumer :: forall v. Context v -> ContextConsumer v
-
+-- | Creates a `Context` from a given value
 createContext :: forall v. v -> Context v
-createContext = _createContext
+createContext v = react ... "createContext" $ [v]
 
-provider :: forall v. Context v -> ContextProvider v
-provider = _contextProvider
+provider :: forall v. Context v -> Provider v
+provider c = c .. "Provider"
 
-consumer :: forall v. Context v -> ContextConsumer v
-consumer = _contextConsumer
+consumer :: forall v. Context v -> Consumer v
+consumer c = c .. "Consumer"
 
+consume :: forall v. Context v -> (v -> Element) -> Element
+consume c f = rawCreateElement c {} [f]
 
 
 -- Ref creation
 
 foreign import data NullableRef :: Type -> Type
 
-foreign import _createRef :: forall r. Unit -> NullableRef r
-
 createRef :: forall r. Unit -> NullableRef r
-createRef = _createRef
-
-foreign import _deref :: forall r. NullableRef r -> Nullable r
+createRef _ = react ... "createRef" $ []
 
 readNullableRef :: forall r. NullableRef r -> Maybe r
-readNullableRef = toMaybe <<< _deref
-
+readNullableRef r = toMaybe $ r .. "current"
 
 -- Ref Forwarding
 
@@ -244,12 +195,18 @@ readNullableRef = toMaybe <<< _deref
 
 -- foreign import _forwardRef :: forall r p. (Fn2 p r Element) -> Forwarded p
 
-named :: forall c. String -> c -> c
-named = runFn2 _named
-
-foreign import _named :: forall c. Fn2 String c c
-
-foreign import _isValid :: forall a. a -> Boolean
+named
+  :: forall props
+  .  String
+  -> EffectFn1 (Record props) Element
+  -> EffectFn1 (Record props) Element
+named = flip $ defineProperty "name"
 
 isValid :: forall a. a -> Boolean
-isValid = _isValid
+isValid a = react ... "isValidElement" $ [ a ]
+
+-- Utils
+
+children :: forall a. a -> Array Element
+children a = react .. "Children" ... "toArray" $ [ (a .. "children") ]
+

@@ -6,10 +6,12 @@
     [ "console"
     , "dom-simple"
     , "effect"
+    , "ffi-simple"
     , "functions"
     , "newtype"
     , "nullable"
     , "prelude"
+    , "refs"
     , "spec"
     , "spec-mocha"
     , "unsafe-coerce" ]

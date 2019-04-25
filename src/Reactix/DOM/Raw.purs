@@ -1,47 +1,51 @@
 module Reactix.DOM.Raw
-  (LeafFactory, TreeFactory
-  , button, div, div', i, i', p, p', span, span'
+  (LeafFactory, ElementFactory
+  , button, div, div', hr
+  , i, i', p, p', span, span'
   , text) where
 
-import Reactix.React (Element, createDOMElement)
+import Reactix.React (Element, createElement)
 import Unsafe.Coerce (unsafeCoerce)
 
-createLeafDOMElement :: forall props. String -> Record props -> Element
-createLeafDOMElement e p = createDOMElement e p []
+createLeafElement :: forall props. String -> Record props -> Element
+createLeafElement e p = createElement e p []
 
 -- A factory function for a DOM element with no children
 type LeafFactory = forall props. Record props -> Element
 
 -- A factory function for a DOM element with children
-type TreeFactory = forall props. Record props -> Array Element -> Element
+type ElementFactory = forall props. Record props -> Array Element -> Element
 
 text :: String -> Element
 text = unsafeCoerce
 
-button :: TreeFactory
-button = createDOMElement "button"
+button :: ElementFactory
+button = createElement "button"
 
-div :: TreeFactory
-div = createDOMElement "div"
+div :: ElementFactory
+div = createElement "div"
 
 div' :: LeafFactory
-div' = createLeafDOMElement "div"
+div' = createLeafElement "div"
 
-i :: TreeFactory
-i = createDOMElement "i"
+hr :: LeafFactory
+hr = createLeafElement "hr"
+
+i :: ElementFactory
+i = createElement "i"
 
 i' :: LeafFactory
-i' = createLeafDOMElement "i"
+i' = createLeafElement "i"
 
-p :: TreeFactory
-p = createDOMElement "p"
+p :: ElementFactory
+p = createElement "p"
 
 p' :: LeafFactory
-p' = createLeafDOMElement "p"
+p' = createLeafElement "p"
 
-span :: TreeFactory
-span = createDOMElement "span"
+span :: ElementFactory
+span = createElement "span"
 
 span' :: LeafFactory
-span' = createLeafDOMElement "span"
+span' = createLeafElement "span"
 
