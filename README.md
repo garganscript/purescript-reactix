@@ -1,10 +1,17 @@
-# purescript-reactix-lite
+# purescript-reactix
 
 A minimal purescript binding to React Hooks
 
 ## Status: alpha
 
-All hooks are implemented, few are tested well, if at all.
+Features are being added and tested as I need them for work.
+
+Hooks believed to work correctly:
+
+* `useState`
+* `useEffect`
+* `useLayoutEffect`
+* `useRef`
 
 ## Rationale
 
@@ -28,37 +35,80 @@ Hooks are IMHO a breakthrough feature. They're simple to reason about
 and they're low on boilerplate. They make React programming much more
 fun and productive and I never want to touch a class component again.
 
-## Concepts
+Reactix is a Hooks-first (Hooks-only?) React library focusing on
+simplicity and ease-of-use.
 
-### Pure components
+<!-- ## Tutorial -->
 
+<!-- There is a tutorial in `docs/tutorial.md` or [online](https://github.com/irresponsible/purescript-reactix/blob/master/docs/tutorial.md) -->
 
+<!-- ## Usage -->
 
-### Hooks components
+## Interop
 
-## Limitations
+If you wish to use this library with other react libraries, you will
+need to write a little glue. The minimum you can sanely get away with
+is a typed wrapper over `unsafeCoerce` between `Element` and whatever your
+other library's element type is.
 
 ## Alternatives
 
-This library uses React directly and knows nothing of any other
-purescript React libraries. If you already use a react library, you
-should consider one of these libraries instead:
+If you already use `purescript-react-basic`, you may prefer
+[purescript-react-basic-hooks](https://github.com/spicydonuts/purescript-react-basic-hooks),
+a similar library implemented on top of `purescript-react-basic`.
 
-- [purescript-reactix-react](https://github.com/irresponsible/purescript-reactix-react) (a fork of this library to support purescript-react)
-- [purescript-react-basic-hooks](https://github.com/spicydonuts/purescript-react-basic-hooks) (a similar library implemented on top of purescript-react-basic)
+## TODO
 
-# Gluing 
+* DOM
+  * safe props
+* Synthetic Events
+  * Come up with a testing strategy
+  * What do do about event targets?
+  * Implement remaining
+* React
+  * Refs
+  * isValid (test)
+  * context (createContext, provider, consumer, provide, consume)
+* Hooks
+  * useEffect/useLayoutEffect
+    * Test they're fired at the correct stage
+  * useReducer
+    * Tests
+  * useMemo
+    * Tests
+  * useCallback
+    * Tests
+  * useRef
+    * Tests
+  * useContext
+    * Tests
+  * useImperativeHandle
+    * Tests
+  * useDebugValue
+    * Tests
 
-If you wish to use this library directly anyway, you will need to
-write a little glue.
+## Changelog
 
-# Usage
+### 0.1.1
 
+* Add a, li, nav, ul tags to R.DOM.Raw
+* Add `R.Hooks.useRef`
 
+### 0.1.0
 
-# TODO
+* First numbered release
+* Made `useState`, `useEffect` and `useLayoutEffect` take dummy
+  `Unit`s to delay execution until the appropriate time
 
-More, better tests.
+Supported Hooks:
+
+* `useState`
+* `useEffect`
+* `useLayoutEffect`
+
+Notable changes:
+
+* Major refactor to use [ffi-simple](https://github.com/irresponsible/purescript-ffi-simple).
 
 ## Copyright and License
 

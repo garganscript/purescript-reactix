@@ -12,18 +12,14 @@ function _memo(prop) {
   }
 }
 exports._tuple = function tuple(ctor, v) { return ctor(v[0])(v[1]); };
-
+exports._tupleCurrent = function tupleCurrent(ctor, ref) {
+  const set = function(v) { ref.current = v; };
+  return ctor(ref.current)(set);
+};
 exports._useContext = _simple('useContext');
 exports._useDebugValue = _simple('useDebugValue');
 exports._useDebugValuePrime = _simple('useDebugValue');
 // exports._useImperativeHandle = _simple('useImperativeHandle');
-
-exports._useRef = function(ctor, value) {
-  const r = React.useRef(value);
-  const set = function(v) { r.current = v; };
-  return ctor(r.current)(set);
-};
-
 exports._useMemo = _simple('useMemo');
 exports._useMemo1 = _memo('useMemo');
 exports._useMemo2 = _memo('useMemo');

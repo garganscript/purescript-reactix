@@ -8,7 +8,7 @@ module Reactix.Hooks
   -- , useReducer, useReducer'
   -- , useContext
   -- , useMemo, useMemo1, useMemo2 --, useMemo3, useMemo4, useMemo5
-  -- , Ref, useRef
+  , Ref, useRef
   -- , useDebugValue, useDebugValue'
   -- , useImperativeHandle
   )
@@ -143,12 +143,11 @@ useLayoutEffect5 a b c d f e = _useLayoutEffect e $ args5 a b c d f
 
 -- useRef
 
-type Ref state = Tuple state (EffectFn1 state Unit)
-
-foreign import _useRef :: forall r s. EffectFn2 (r -> s -> Tuple r s) r (Ref r)
+type Ref state = Tuple state (state -> Effect Unit)
 
 useRef :: forall r. r -> Hooks (Ref r)
-useRef r = unsafeHooksEffect $ runEffectFn2 _useRef Tuple r
+useRef r = hook $ \_ -> pure $ friendly $ tupleCurrent $ react ... "useRef" $ [ r ]
+  where friendly (Tuple v s) = Tuple v (runEffectFn1 s)
 
 -- useContext
 
@@ -180,6 +179,11 @@ tuple :: forall a b c. a -> Tuple b c
 tuple = runFn2 _tuple Tuple
 
 foreign import _tuple :: forall a b c. Fn2 (a -> b -> Tuple a b) c (Tuple a b)
+
+tupleCurrent :: forall a b c. a -> Tuple b c
+tupleCurrent = runFn2 _tupleCurrent Tuple
+
+foreign import _tupleCurrent :: forall a b c. Fn2 (a -> b -> Tuple a b) c (Tuple a b)
 
 hook :: forall v. (Unit -> Effect v) -> Hooks v
 hook = unsafeHooksEffect <<< delay
