@@ -6,6 +6,7 @@ module Reactix.React
 
   , Context, Provider, Consumer, createContext, provider, consumer, consume
   , render
+  , createPortal
   
   , class IsComponent
   , Component, createElement
@@ -134,7 +135,12 @@ instance semigroupElement :: Semigroup Element where
 
 -- | Renders a React Element to a real Element
 render :: Element -> DOM.Element -> Effect Unit
-render e d = delay \_ -> react ... "render" $ args2 e d
+render e d = delay $ \_ -> react ... "render" $ args2 e d
+
+createPortal :: Array Element -> DOM.Element -> Element
+createPortal es e = reactDOM ... "createPortal" $ args2 es e
+
+
 
 -- -- Memoisation
 
