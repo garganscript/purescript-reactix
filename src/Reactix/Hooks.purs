@@ -8,7 +8,7 @@ module Reactix.Hooks
   -- , useReducer, useReducer'
   -- , useContext
   -- , useMemo, useMemo1, useMemo2 --, useMemo3, useMemo4, useMemo5
-  , Ref, useRef, readRef, setRef
+  , useRef
   -- , useDebugValue, useDebugValue'
   -- , useImperativeHandle
   )
@@ -22,7 +22,7 @@ import Effect.Uncurried ( EffectFn1, runEffectFn1, EffectFn2, runEffectFn2, Effe
 import FFI.Simple ( (...), (..), delay, args2, args3, args4, args5, setProperty )
 import DOM.Simple.Console 
 
-import Reactix.React ( Hooks, react, unsafeHooksEffect )
+import Reactix.React ( Ref, Hooks, react, unsafeHooksEffect )
 
 
 
@@ -142,19 +142,8 @@ useLayoutEffect5 a b c d f e = _useLayoutEffect e $ args5 a b c d f
 
 -- useRef
 
-foreign import data Ref :: Type -> Type
-
 useRef :: forall r. r -> Hooks (Ref r)
 useRef r = hook $ \_ -> pure $ react ... "useRef" $ [ r ]
-
-readRef :: forall r. Ref r -> r
-readRef r = r .. "current"
-
-setRef :: forall r. Ref r -> r -> Effect Unit
-setRef r v = delay $ \_ -> do
-   _ <- pure $ setProperty "current" r v
-   pure unit
-
 
 -- useContext
 

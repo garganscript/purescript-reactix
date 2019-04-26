@@ -13,7 +13,7 @@ module Reactix.React
   , staticComponent, hooksComponent
   , fragment
 
-  , NullableRef, createRef, readNullableRef
+  , Ref, createRef, readRef, readNullableRef, setRef
 
   , isValid
 
@@ -32,7 +32,8 @@ import Unsafe.Coerce (unsafeCoerce)
 import Prim.Row (class Lacks)
 import DOM.Simple as DOM
 import FFI.Simple.PseudoArray as PA
-import FFI.Simple ( (..), (...), args2, args3, delay, defineProperty )
+import FFI.Simple
+  ( (..), (...), args2, args3, delay, setProperty, defineProperty )
 
 foreign import data React :: Type
 foreign import data ReactDOM :: Type
@@ -188,13 +189,21 @@ consume c f = rawCreateElement c {} [f]
 
 -- Ref creation
 
-foreign import data NullableRef :: Type -> Type
+foreign import data Ref :: Type -> Type
 
-createRef :: forall r. Unit -> NullableRef r
+createRef :: forall r. Unit -> Ref (Nullable r)
 createRef _ = react ... "createRef" $ []
 
-readNullableRef :: forall r. NullableRef r -> Maybe r
+readRef :: forall r. Ref r -> r
+readRef r = r .. "current"
+
+readNullableRef :: forall r. Ref (Nullable r) -> Maybe r
 readNullableRef r = toMaybe $ r .. "current"
+
+setRef :: forall r. Ref r -> r -> Effect Unit
+setRef r v = delay $ \_ -> do
+   _ <- pure $ setProperty "current" r v
+   pure unit
 
 -- Ref Forwarding
 

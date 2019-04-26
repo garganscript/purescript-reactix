@@ -22,8 +22,9 @@ import DOM.Simple.Element as Element
 import DOM.Simple.Event as Event
 import Reactix as R
 import Reactix.Test as RT
-import Reactix.DOM.Raw ( button, div, i, text )
+import Reactix.DOM.HTML ( button, div, i, text )
 import DOM.Simple.Console
+
 staticTest :: Spec Unit
 staticTest =
   describe "Basic DOM rendering" $ do
