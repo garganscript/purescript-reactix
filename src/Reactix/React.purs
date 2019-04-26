@@ -133,6 +133,9 @@ fragment es = rawCreateElement (react .. "Fragment") {} es
 instance semigroupElement :: Semigroup Element where
   append a b = fragment [a, b]
 
+instance monoidElement :: Monoid Element where
+  mempty = fragment []
+
 -- | Renders a React Element to a real Element
 render :: Element -> DOM.Element -> Effect Unit
 render e d = delay $ \_ -> react ... "render" $ args2 e d
