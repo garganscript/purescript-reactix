@@ -5,7 +5,7 @@ import Prelude
 import DOM.Simple as DOM
 import Effect ( Effect )
 import Effect.Uncurried ( EffectFn1, runEffectFn1 )
-import FFI.Simple ( (..), (...) )
+import FFI.Simple ( (..), (...), delay )
 
 class IsSyntheticEvent e
 
@@ -48,10 +48,10 @@ type' e = e .. "type"
 -- nativeEvent e = e .. "nativeEvent"
 
 stopPropagation :: forall e. IsSyntheticEvent e => e -> Effect Unit
-stopPropagation e = e ... "stopPropagation" $ []
+stopPropagation e = delay $ \_ -> pure $ e ... "stopPropagation" $ []
 
 preventDefault :: forall e. IsSyntheticEvent e => e -> Effect Unit
-preventDefault e = e ... "preventDefault" $ []
+preventDefault e = delay $ \_ -> pure $ e ... "preventDefault" $ []
 
 isPropagationStopped :: forall e. IsSyntheticEvent e => e -> Effect Unit
 isPropagationStopped e = e ... "isPropagationStopped" $ []
