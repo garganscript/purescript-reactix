@@ -37,7 +37,7 @@ render e = pure $ raw { getByText=getByText, getByTestId=getByTestId }
 
 -- | Make react behave more predictably in tests
 act :: forall t. (Unit -> Effect t) -> Effect t
-act f = testUtils ... "act" $ [ delay f ]
+act f = testUtils ... "act" $ [ delay unit f ]
 
 fireClick :: DOM.Element -> Effect Unit
 fireClick = fireEvent "click"
@@ -46,5 +46,5 @@ fireEvent :: String -> DOM.Element -> Effect Unit
 fireEvent ev el = pure $ (testingLibrary .. "fireEvent") ... ev $ [el]
 
 cleanup :: Effect Unit
-cleanup = delay $ \_ -> pure $ testingLibrary ... "cleanup" $ []
+cleanup = delay unit $ \_ -> pure $ testingLibrary ... "cleanup" $ []
 
