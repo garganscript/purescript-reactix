@@ -122,12 +122,12 @@ let additions =
 		  [ "console", "effect", "functions", "nullable", "prelude"
 		  , "spec", "spec-mocha", "unsafe-coerce" ]
 		  "https://github.com/irresponsible/purescript-dom-simple"
-		  "master"
+		  "v0.2.1"
       , ffi-simple =
           mkPackage
           [ "functions", "nullable", "prelude" ]
           "https://github.com/irresponsible/purescript-ffi-simple"
-          "v0.1.2"
+          "v0.2.1"
       , spec-mocha =
 	      mkPackage
 		  [ "console", "foldable-traversable", "exceptions", "spec" ]
