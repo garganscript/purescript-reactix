@@ -24,9 +24,6 @@ import DOM.Simple.Console
 
 import Reactix.React ( Ref, Hooks, react, unsafeHooksEffect )
 
-
-
-
 --- useState
 
 -- | A state hook is a tuple of value and setter
@@ -34,7 +31,7 @@ type State state = Tuple state (state -> Effect Unit)
 
 -- | Given an Effect function returning an initial value, returns a State
 useState :: forall s. (Unit -> Effect s) -> Hooks (State s)
-useState s = hook $ \_ -> pure $ currySecond $ tuple $ react ... "useState" $ [ delay s ]
+useState s = hook $ \_ -> pure $ currySecond $ tuple $ react ... "useState" $ [ delay unit s ]
 -- -- useReducer
 
 -- type Reducer state action = Tuple state (EffectFn1 action Unit)
@@ -60,9 +57,9 @@ useState s = hook $ \_ -> pure $ currySecond $ tuple $ react ... "useState" $ [ 
 type HookEffect = Unit -> Effect (Unit -> Effect Unit)
 
 wrapEffect :: HookEffect -> Effect (Effect Unit)
-wrapEffect f = do
+wrapEffect f = delay unit $ \_ -> do
   cleanup <- f unit
-  pure $ delay cleanup
+  pure $ delay unit cleanup
 
 _useEffect :: forall a. HookEffect -> a -> Hooks Unit
 _useEffect e a = hook $ \_ -> pure $ react ... "useEffect" $ args2 (wrapEffect e) a
@@ -185,6 +182,6 @@ currySecond :: forall a b c. Tuple a (EffectFn1 b c) -> Tuple a (b -> Effect c)
 currySecond (Tuple a b) = Tuple a (runEffectFn1 b)
 
 hook :: forall v. (Unit -> Effect v) -> Hooks v
-hook = unsafeHooksEffect <<< delay
+hook f = unsafeHooksEffect (delay unit f)
 
 
