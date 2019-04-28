@@ -89,6 +89,10 @@ a similar library implemented on top of `purescript-react-basic`.
 
 ## Changelog
 
+### 0.2.0
+
+* Make SyntheticEvent parameterised by a native event
+
 ### 0.1.1
 
 * Add a, li, nav, ul tags to R.DOM.Raw
