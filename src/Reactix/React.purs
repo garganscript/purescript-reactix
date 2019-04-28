@@ -139,7 +139,7 @@ instance monoidElement :: Monoid Element where
 
 -- | Renders a React Element to a real Element
 render :: Element -> DOM.Element -> Effect Unit
-render e d = delay $ \_ -> react ... "render" $ args2 e d
+render e d = delay unit $ \_ -> react ... "render" $ args2 e d
 
 createPortal :: Array Element -> DOM.Element -> Element
 createPortal es e = reactDOM ... "createPortal" $ args2 es e
@@ -201,7 +201,7 @@ readNullableRef :: forall r. Ref (Nullable r) -> Maybe r
 readNullableRef r = toMaybe $ r .. "current"
 
 setRef :: forall r. Ref r -> r -> Effect Unit
-setRef r v = delay $ \_ -> do
+setRef r v = delay unit $ \_ -> do
    _ <- pure $ setProperty "current" r v
    pure unit
 
