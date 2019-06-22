@@ -125,9 +125,15 @@ let additions =
 		  "v0.2.1"
       , ffi-simple =
           mkPackage
-          [ "functions", "nullable", "prelude" ]
+          [ "prelude", "effect", "maybe", "functions", "nullable", "unsafe-coerce" ]
           "https://github.com/irresponsible/purescript-ffi-simple"
-          "v0.2.1"
+          "v0.2.4"
+      , inflection =
+          mkPackage
+          [ "functions" ]
+          "https://github.com/athanclark/purescript-inflection"
+          "v1.0.0"
+
       , spec-mocha =
 	      mkPackage
 		  [ "console", "foldable-traversable", "exceptions", "spec" ]

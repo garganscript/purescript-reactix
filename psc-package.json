@@ -3,11 +3,12 @@
   "set": "local",
   "source": ".psc-package",
   "depends":
-    [ "console"
+    [ "aff"
     , "dom-simple"
     , "effect"
     , "ffi-simple"
     , "functions"
+    , "inflection"
     , "newtype"
     , "nullable"
     , "prelude"
