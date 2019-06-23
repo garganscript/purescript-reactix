@@ -1,17 +1,19 @@
 # purescript-reactix
 
-A minimal purescript binding to React Hooks
+A minimal, modern react binding focusing on ease-of-use
 
 ## Status: alpha
 
 Features are being added and tested as I need them for work.
 
-Hooks believed to work correctly:
+Hooks believed to work correctly (including variants)
 
 * `useState`
+* `useReducer`
+* `useContext`
+* `useRef`
 * `useEffect`
 * `useLayoutEffect`
-* `useRef`
 
 ## Rationale
 
@@ -35,8 +37,8 @@ Hooks are IMHO a breakthrough feature. They're simple to reason about
 and they're low on boilerplate. They make React programming much more
 fun and productive and I never want to touch a class component again.
 
-Reactix is a Hooks-first (Hooks-only?) React library focusing on
-simplicity and ease-of-use.
+Reactix is a modern, Hooks-first React library focusing on simplicity
+and ease-of-use.
 
 <!-- ## Tutorial -->
 
@@ -57,37 +59,67 @@ If you already use `purescript-react-basic`, you may prefer
 [purescript-react-basic-hooks](https://github.com/spicydonuts/purescript-react-basic-hooks),
 a similar library implemented on top of `purescript-react-basic`.
 
+
 ## TODO
 
-* DOM
-  * safe props
-* Synthetic Events
-  * Come up with a testing strategy
-  * What do do about event targets?
-  * Implement remaining
-* React
-  * Refs
-  * isValid (test)
-  * context (createContext, provider, consumer, provide, consume)
-* Hooks
-  * useEffect/useLayoutEffect
-    * Test they're fired at the correct stage
-  * useReducer
-    * Tests
-  * useMemo
-    * Tests
-  * useCallback
-    * Tests
-  * useRef
-    * Tests
-  * useContext
-    * Tests
-  * useImperativeHandle
-    * Tests
-  * useDebugValue
-    * Tests
+Not in any particular order
+
+1. Safe DOM props:
+  * Make sure each element only takes the correct props
+  * Translate some props with minimal and efficient wrapping
+2. Refs
+  * Test forwardRef
+3. Context
+  * Test consumer (we only test useContext right now)
+4. Misc hooks
+  * Test useEffect/useLayoutEffect are fired at the correct stage
+  * Test useMemo/useCallback
+  * Test useImperativeHandle
+  * Test useDebugValue
+  * Test React.isValid
+5. Move to `Aff` instead of `Effect`
 
 ## Changelog
+
+<!-- ### NEXT -->
+
+<!-- Newly supported functions: -->
+
+<!-- * `R.React.consumeContext` -->
+<!-- * `R.React.provide` - provider a value through a `Provider` -->
+<!-- * `R.React.consume` - consume a value through a `Consumer` -->
+
+### 0.3.0
+
+Newly supported hooks and variants:
+
+* `R.Hooks.useReducer`
+* `R.Hooks.useReducer'` (`useReducer` with a constant initial value)
+* `R.Hooks.useContext`
+* `R.Hooks.useState'` (`useState` with a constant initial value)
+* `R.Hooks.useEffect[1-5]'` (`useEffect` with no cleanup function)
+* `R.Hooks.useLayoutEffect[1-5]'` (`useLayoutEffect` with no cleanup function)
+
+Newly supported functions:
+
+* `R.React.createContext` - create a `Context` with a default value
+* `R.React.provideContext` - provide a `Context` a value to some children
+* `R.React.provider` - get a `Provider` for a `Context`
+* `R.React.consumer` - get a `Consumer` for a `Context`
+* `R.Hooks.nothing` - an empty cleanup function
+* `R.Hooks.thenNothing` - make an effect function return an empty cleanup function
+
+Bug Fixes:
+
+* `R.React.render` was broken because the tests don't use it and
+  neither does the main consumer of this project where it gets put
+  through its paces
+
+Misc:
+
+* First attempts at all remaining hook functions have been written and
+  not tested. Don't be surprised if they don't work.
+* Remove foreign javascript file for `R.Hooks` in favour of `ffi-simple`
 
 ### 0.2.0
 
@@ -107,8 +139,8 @@ a similar library implemented on top of `purescript-react-basic`.
 Supported Hooks:
 
 * `useState`
-* `useEffect`
-* `useLayoutEffect`
+* `useEffect[1-5]?`
+* `useLayoutEffect[1-5]?`
 
 Notable changes:
 

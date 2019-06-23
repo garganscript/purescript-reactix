@@ -1,10 +1,12 @@
 {
   "name": "reactix",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "",
   "scripts": {
+    "rebase-set": "spago package-set-upgrade && spago psc-package-insdhall",
     "rebuild-set": "spago psc-package-insdhall",
     "install-ps": "psc-package install",
+    "repl": "pulp --psc-package repl",
     "build": "pulp browserify -I test --main Test.Main > output/bundle.js",
     "test": "karma start"
   },
