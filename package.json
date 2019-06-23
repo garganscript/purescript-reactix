@@ -20,7 +20,7 @@
     "pulp": "^13.0.0",
     "purescript": "^0.13.0",
     "purs-loader": "^3.2.0",
-    "react-testing-library": "^8.0.1",
+    "@testing-library/react": "^8.0.1",
     "spago": "^0.8.5"
   },
   "dependencies": {
