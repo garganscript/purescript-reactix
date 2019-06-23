@@ -1,15 +1,16 @@
 module Reactix.React
   ( React, react
-  , ReactDOM, reactDOM
+  , ReactDOM, reactDOM, render
   , Element
   , Hooks, unsafeHooksEffect, runHooks
 
-  , Context, Provider, Consumer, createContext, provider, consumer, consume
-  , render
+  , Context, createContext, provideContext, consumeContext
+  , Provider, provider, provide
+  , Consumer, consumer, consume
   , createPortal
   
   , class IsComponent
-  , Component, createElement
+  , Component, createElement, createDOMElement
   , staticComponent, hooksComponent
   , fragment
 
@@ -23,17 +24,18 @@ module Reactix.React
 
 import Prelude
 import Data.Function.Uncurried (mkFn2)
-import Data.Maybe ( Maybe )
-import Data.Nullable ( Nullable, toMaybe )
-import Effect ( Effect )
-import Effect.Class ( class MonadEffect, liftEffect )
+import Data.Maybe (Maybe, maybe)
+import Data.Nullable (Nullable, toMaybe)
+import Effect (Effect)
+import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Uncurried (EffectFn1, mkEffectFn1, EffectFn2)
 import Unsafe.Coerce (unsafeCoerce)
 import Prim.Row (class Lacks)
 import DOM.Simple as DOM
 import FFI.Simple.PseudoArray as PA
 import FFI.Simple
-  ( (..), (...), args2, args3, delay, setProperty, defineProperty )
+  ( (..), (...), (.=), args2, args3, delay, setProperty, defineProperty )
+import FFI.Simple.Undef (nullUndef)
 
 foreign import data React :: Type
 foreign import data ReactDOM :: Type
@@ -71,21 +73,20 @@ instance monadHooks :: Monad Hooks
 unsafeHooksEffect :: forall a. Effect a -> Hooks a
 unsafeHooksEffect = Hooks
 
+type DOMProps = ()
+
 class IsComponent component (props :: # Type) children
-  | component -> props
-  , component -> children
+  | component -> props, component -> children where
+  createElement :: component -> Record props -> children -> Element
 
-instance componentIsComponent :: IsComponent (Component props) props (Array Element)
-instance memoIsComponent :: IsComponent (Memo props) props (Array Element)
-instance stringIsComponent  :: IsComponent String props (Array Element)
-instance providerIsComponent :: IsComponent (Provider v) (value :: v) (Array Element)
-instance consumerIsComponent :: IsComponent (Consumer v) () (v -> Element)
-
-createElement
-  :: forall component props
-  .  IsComponent component props (Array Element)
-  => component -> Record props -> Array Element -> Element
-createElement = rawCreateElement
+instance componentIsComponent :: IsComponent (Component props) props (Array Element) where
+  createElement = rawCreateElement
+instance memoIsComponent :: IsComponent (Memo props) props (Array Element) where
+  createElement = rawCreateElement
+instance providerIsComponent :: IsComponent (Provider v) (value :: v) (Array Element) where
+  createElement = rawCreateElement
+instance consumerIsComponent :: IsComponent (Consumer v) () (v -> Element) where
+  createElement c p cs = rawCreateElement c p [cs]
 
 -- Component building
 
@@ -116,6 +117,9 @@ rawCreateElement :: forall c p cs. c -> p -> Array cs -> Element
 rawCreateElement c p cs = react ... "createElement" $ args
    where args = PA.unshift c $ PA.unshift p cs
 
+createDOMElement :: forall r. String -> Record r -> Array Element -> Element
+createDOMElement = rawCreateElement
+
 -- Element cloning
 
 -- | Clones an element. Quite unsafe because tripping through Element
@@ -139,7 +143,7 @@ instance monoidElement :: Monoid Element where
 
 -- | Renders a React Element to a real Element
 render :: Element -> DOM.Element -> Effect Unit
-render e d = delay unit $ \_ -> react ... "render" $ args2 e d
+render e d = delay unit $ \_ -> reactDOM ... "render" $ args2 e d
 
 createPortal :: Array Element -> DOM.Element -> Element
 createPortal es e = reactDOM ... "createPortal" $ args2 es e
@@ -180,18 +184,28 @@ createContext v = react ... "createContext" $ [v]
 provider :: forall v. Context v -> Provider v
 provider c = c .. "Provider"
 
+provide :: forall v. Provider v -> v -> Array Element -> Element
+provide p v = rawCreateElement p { value: v }
+
+provideContext :: forall v. Context v -> v -> Array Element -> Element
+provideContext c = provide (provider c)
+
 consumer :: forall v. Context v -> Consumer v
 consumer c = c .. "Consumer"
 
-consume :: forall v. Context v -> (v -> Element) -> Element
+consume :: forall v. Consumer v -> (v -> Element) -> Element
 consume c f = rawCreateElement c {} [f]
 
+consumeContext :: forall v. Context v -> (v -> Element) -> Element
+consumeContext c = consume (consumer c)
 
 -- Ref creation
 
 foreign import data Ref :: Type -> Type
 
-createRef :: forall r. Unit -> Ref (Nullable r)
+type NullableRef r = Ref (Nullable r)
+
+createRef :: forall r. Unit -> NullableRef r
 createRef _ = react ... "createRef" $ []
 
 readRef :: forall r. Ref r -> r
@@ -201,9 +215,7 @@ readNullableRef :: forall r. Ref (Nullable r) -> Maybe r
 readNullableRef r = toMaybe $ r .. "current"
 
 setRef :: forall r. Ref r -> r -> Effect Unit
-setRef r v = delay unit $ \_ -> do
-   _ <- pure $ setProperty "current" r v
-   pure unit
+setRef r v = delay unit $ \_ -> (pure $ r .= "current" $ v) *> pure unit
 
 -- Ref Forwarding
 

@@ -3,6 +3,7 @@ module Reactix.React.Spec where
 import Prelude
 import Data.Array as A
 import Data.Array ( (!!) )
+import Data.EuclideanRing (mod)
 import Data.Maybe ( Maybe(..) )
 import Data.Traversable ( traverse, traverse_, sequence_ )
 import Data.Tuple ( Tuple(..) )
@@ -83,6 +84,55 @@ counterTest =
       let children4 = Element.children root.container >>= Element.children
       A.length children4 `shouldEqual` 2
       (Element.innerHTML <$> children4) `shouldEqual` ["++", "2"]
+
+data BicounterOp = Inc | Dec
+
+-- No bi erasure here
+bicounterCpt :: R.Component CounterProps
+bicounterCpt = R.hooksComponent "Bicounter" cpt
+  where
+    cpt {count} _ = do
+      y /\ reduceY <- R.useReducer' reduce count
+      pure $ div { className: "counter" }
+        [ button { type: "button",  onClick: onclick reduceY Inc } [ text "++" ]
+        , button { type: "button",  onClick: onclick reduceY Dec } [ text "--" ]
+        , div {} [ text (show y) ] ]
+    onclick reducer with = mkEffectFn1 $ \_ -> reducer with
+    reduce count Inc = count + 1
+    reduce count Dec = count - 1
+
+bicounterTest :: Spec Unit
+bicounterTest =
+  describe "Bicounter" do
+    it "Works for plain components" $ do
+      let counter = R.createElement bicounterCpt {count: 0} []
+      liftEffect (RT.render counter) >>= test
+    it "Works for memoised components" $ do
+      let counter = R.createElement (R.memo bicounterCpt (==)) {count: 0} []
+      liftEffect (RT.render counter) >>= test
+    it "works for memo'ised components" $ do
+      let counter = R.createElement (R.memo' bicounterCpt) {count: 0} []
+      liftEffect (RT.render counter) >>= test
+  where
+    test root = do
+      let children = Element.children root.container
+      A.length children `shouldEqual` 1
+      let children2 = children >>= Element.children
+      A.length children2 `shouldEqual` 3
+      (Element.name <$> children2) `shouldEqual` ["BUTTON", "BUTTON", "DIV"]
+      (Element.innerHTML <$> children2) `shouldEqual` ["++", "--", "0"]
+      liftEffect $ traverse_ RT.fireClick (children2 !! 0)
+      let children3 = Element.children root.container >>= Element.children
+      A.length children3 `shouldEqual` 3
+      (Element.innerHTML <$> children3) `shouldEqual` ["++", "--", "1"]
+      liftEffect $ traverse_ RT.fireClick (children3 !! 0)
+      let children4 = Element.children root.container >>= Element.children
+      A.length children4 `shouldEqual` 3
+      (Element.innerHTML <$> children4) `shouldEqual` ["++", "--", "2"]
+      liftEffect $ traverse_ RT.fireClick (children4 !! 1)
+      let children5 = Element.children root.container >>= Element.children
+      A.length children5 `shouldEqual` 3
+      (Element.innerHTML <$> children4) `shouldEqual` ["++", "--", "1"]
           
 data EffectorState = Fresh | Initialised | Done
 
@@ -151,26 +201,101 @@ layoutEffectorTest =
       state' <- liftEffect $ Ref.read ref
       state' `shouldEqual` Done
 
-type ContextProps = ()
+data Theme = Dark | Light
 
--- contextualCpt :: R.Component ContextProps
--- contextualCpt = R.hooksComponent "Contextual" cpt
---   where cpt {stateRef} _ = do
---           R.useEffect $ \_ -> do
---             Ref.write Initialised stateRef
---             pure $ \_ -> Ref.write Done stateRef
---           pure $ div {} []
+showTheme :: Maybe Theme -> String
+showTheme Nothing = "none"
+showTheme (Just Dark) = "dark"
+showTheme (Just Light) = "light"
 
--- contextTest :: Spec Unit
--- contextTest =
---   describe "Context" do
+type ThemedProps = ( theme :: R.Context (Maybe Theme) )
+type ThemeChooserProps = ( )
+
+themedCpt :: R.Component ThemedProps
+themedCpt = R.hooksComponent "Themed" cpt
+  where
+    cpt {theme} _ = do
+      theme' <- R.useContext theme
+      pure $ div {} [ text (showTheme theme') ]
+
+themeChooserCpt :: R.Component ThemeChooserProps
+themeChooserCpt = R.hooksComponent "ThemeChooser" cpt
+  where
+    cpt props _ = do
+      theme /\ setTheme <- R.useState' $ Nothing
+      ref <- R.useRef $ R.createContext Nothing
+      let context = R.readRef ref
+      pure $
+        div {}
+        [ button { type: "button",  onClick: onclick setTheme Nothing } [ text "None" ]
+        , button { type: "button",  onClick: onclick setTheme (Just Dark) } [ text "Dark" ]
+        , button { type: "button",  onClick: onclick setTheme (Just Light) } [ text "Light" ]
+        , R.provideContext context theme [ R.createElement themedCpt { theme: context } [] ] ]
+    onclick setTheme theme = mkEffectFn1 $ \_ -> setTheme theme
+themeChooserTest :: Spec Unit
+themeChooserTest =
+  describe "ThemeChooser" do
+    it "Works for plain components" $ do
+      let themeChooser = R.createElement themeChooserCpt {} []
+      liftEffect (RT.render themeChooser) >>= test
+  where 
+    test root = do
+      let children = Element.children root.container
+      A.length children `shouldEqual` 1
+      let children2 = children >>= Element.children
+      A.length children2 `shouldEqual` 4
+      (Element.name <$> children2) `shouldEqual` ["BUTTON", "BUTTON", "BUTTON", "DIV"]
+      (Element.innerHTML <$> children2) `shouldEqual` ["None", "Dark", "Light", "none"]
+      liftEffect $ traverse_ RT.fireClick (children2 !! 0)
+      let children3 = (Element.children root.container) >>= Element.children
+      A.length children3 `shouldEqual` 4
+      (Element.innerHTML <$> children3) `shouldEqual` ["None", "Dark", "Light", "none"]
+      liftEffect $ traverse_ RT.fireClick (children3 !! 1)
+      let children4 = (Element.children root.container) >>= Element.children
+      A.length children4 `shouldEqual` 4
+      (Element.innerHTML <$> children4) `shouldEqual` ["None", "Dark", "Light", "dark"]
+      liftEffect $ traverse_ RT.fireClick (children4 !! 2)
+      let children5 = (Element.children root.container) >>= Element.children
+      A.length children5 `shouldEqual` 4
+      (Element.innerHTML <$> children5) `shouldEqual` ["None", "Dark", "Light", "light"]
+      
+    
+-- type FizzBuzzProps = ( context :: R.Context Int )
+
+-- fizzBuzzCpt :: R.Component FizzBuzzProps
+-- fizzBuzzCpt = R.hooksComponent "FizzBuzz" cpt
+--   where
+--     cpt {context} _ = do
+--       count <- R.useContext context
+--       pure $
+--         div {}
+--         [ button { type: "button",  onClick: onclick reduceY Inc } [ text "++" ]
+--         , button { type: "button",  onClick: onclick reduceY Dec } [ text "--" ]
+--         , div {} [ text (fizzbuzz count) ] ]
+--     fizzbuzz count
+--       | count == 0 = "Nothing"
+--       | count `mod` 15 == 0 = "FizzBuzz"
+--       | count `mod` 3 == 0 = "Fizz"
+--       | count `mod` 5 == 0 = "Buzz"
+--       | true = show count
+
+-- fizzBuzzTest :: Spec Unit
+-- fizzBuzzTest =
+--   describe "FizzBuzz" do
 --     it "Works for plain components" $
---       test $ contextualCpt
---   where test cpt = pure unit
+--       test $ fizzBuzzCpt
+--     -- it "Works for memo'ised components" $
+--     --   test $ R.memo' fizzBuzzCpt
+--   where
+--     test :: forall cpt. R.IsComponent cpt FizzBuzzProps (Array R.Element) => cpt -> Aff Unit
+--     test cpt = do
+--       let context = R.createContext 0
+    
+--       pure unit
+    
 
--- reducerTest :: Spec Unit
 -- memoTest :: Spec Unit
--- refTest :: Spec Unit
+-- callbackTest :: Spec Unit
 -- imperativeHandleTest :: Spec Unit
 -- debugValueTest :: Spec Unit
 
@@ -180,9 +305,11 @@ type ContextProps = ()
 spec :: Spec Unit
 spec = sequence_
   [ staticTest
-  , counterTest
-  , effectorTest
-  , layoutEffectorTest
+  , counterTest        -- useState
+  , bicounterTest      -- useReducer
+  , themeChooserTest   -- useContext, useRef
+  , effectorTest       -- useEffect
+  , layoutEffectorTest -- useLayoutEffect
   ]
   -- , listTest
   -- ]
