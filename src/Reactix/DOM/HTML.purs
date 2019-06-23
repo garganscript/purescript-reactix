@@ -1,10 +1,10 @@
 module Reactix.DOM.HTML where
 
-import Reactix.React (Element, createElement)
+import Reactix.React (Element, createDOMElement)
 import Unsafe.Coerce (unsafeCoerce)
 
 createLeafElement :: forall props. String -> Record props -> Element
-createLeafElement e p = createElement e p []
+createLeafElement e p = createDOMElement e p []
 
 -- A factory function for a DOM element with no children
 type LeafFactory = forall props. Record props -> Element
@@ -32,139 +32,139 @@ text :: String -> Element
 text = unsafeCoerce
 
 a :: ElemFactory
-a = createElement "a"
+a = createDOMElement "a"
 
 abbr :: ElemFactory
-abbr = createElement "abbr"
+abbr = createDOMElement "abbr"
 
 address :: ElemFactory
-address = createElement "address"
+address = createDOMElement "address"
 
 article :: ElemFactory
-article = createElement "article"
+article = createDOMElement "article"
 
 aside :: ElemFactory
-aside = createElement "aside"
+aside = createDOMElement "aside"
 
 audio :: ElemFactory
-audio = createElement "audio"
+audio = createDOMElement "audio"
 
 b :: ElemFactory
-b = createElement "b"
+b = createDOMElement "b"
 
 bdi :: ElemFactory
-bdi = createElement "bdi"
+bdi = createDOMElement "bdi"
 
 bdo :: ElemFactory
-bdo = createElement "bdo"
+bdo = createDOMElement "bdo"
 
 blockquote :: ElemFactory
-blockquote = createElement "blockquote"
+blockquote = createDOMElement "blockquote"
 
 br :: LeafFactory
 br = createLeafElement "br"
 
 button :: ElemFactory
-button = createElement "button"
+button = createDOMElement "button"
 
 canvas :: ElemFactory
-canvas = createElement "canvas"
+canvas = createDOMElement "canvas"
 
 caption :: ElemFactory
-caption = createElement "caption"
+caption = createDOMElement "caption"
 
 cite :: ElemFactory
-cite = createElement "cite"
+cite = createDOMElement "cite"
 
 code :: ElemFactory
-code = createElement "code"
+code = createDOMElement "code"
 
 col :: LeafFactory
 col = createLeafElement "col"
 
 colgroup :: ElemFactory
-colgroup = createElement "colgroup"
+colgroup = createDOMElement "colgroup"
 
 data' :: ElemFactory
-data' = createElement "data"
+data' = createDOMElement "data"
 
 datalist :: ElemFactory
-datalist = createElement "datalist"
+datalist = createDOMElement "datalist"
 
 dd :: ElemFactory
-dd = createElement "dd"
+dd = createDOMElement "dd"
 
 del :: ElemFactory
-del = createElement "del"
+del = createDOMElement "del"
 
 details :: ElemFactory
-details = createElement "details"
+details = createDOMElement "details"
 
 dfn :: ElemFactory
-dfn = createElement "dfn"
+dfn = createDOMElement "dfn"
 
 dialog :: ElemFactory
-dialog = createElement "dialog"
+dialog = createDOMElement "dialog"
 
 div :: ElemFactory
-div = createElement "div"
+div = createDOMElement "div"
 
 dl :: ElemFactory
-dl = createElement "dl"
+dl = createDOMElement "dl"
 
 dt :: ElemFactory
-dt = createElement "dt"
+dt = createDOMElement "dt"
 
 em :: ElemFactory
-em = createElement "em"
+em = createDOMElement "em"
 
 embed :: LeafFactory
 embed = createLeafElement "embed"
 
 fieldset :: ElemFactory
-fieldset = createElement "fieldset"
+fieldset = createDOMElement "fieldset"
 
 figcaption :: ElemFactory
-figcaption = createElement "figcaption"
+figcaption = createDOMElement "figcaption"
 
 figure :: ElemFactory
-figure = createElement "figure"
+figure = createDOMElement "figure"
 
 footer :: ElemFactory
-footer = createElement "footer"
+footer = createDOMElement "footer"
 
 form :: ElemFactory
-form = createElement "form"
+form = createDOMElement "form"
 
 h1 :: ElemFactory
-h1 = createElement "h1"
+h1 = createDOMElement "h1"
 
 h2 :: ElemFactory
-h2 = createElement "h2"
+h2 = createDOMElement "h2"
 
 h3 :: ElemFactory
-h3 = createElement "h3"
+h3 = createDOMElement "h3"
 
 h4 :: ElemFactory
-h4 = createElement "h4"
+h4 = createDOMElement "h4"
 
 h5 :: ElemFactory
-h5 = createElement "h5"
+h5 = createDOMElement "h5"
 
 h6 :: ElemFactory
-h6 = createElement "h6"
+h6 = createDOMElement "h6"
 
 header :: ElemFactory
-header = createElement "header"
+header = createDOMElement "header"
 
 hr :: LeafFactory
 hr = createLeafElement "hr"
 
 i :: ElemFactory
-i = createElement "i"
+i = createDOMElement "i"
 
 iframe :: ElemFactory
-iframe = createElement "iframe"
+iframe = createDOMElement "iframe"
 
 img :: LeafFactory
 img = createLeafElement "img"
@@ -173,157 +173,157 @@ input :: LeafFactory
 input = createLeafElement "input"
 
 ins :: ElemFactory
-ins = createElement "ins"
+ins = createDOMElement "ins"
 
 kbd :: ElemFactory
-kbd = createElement "kbd"
+kbd = createDOMElement "kbd"
 
 label :: ElemFactory
-label = createElement "label"
+label = createDOMElement "label"
 
 legend :: ElemFactory
-legend = createElement "legend"
+legend = createDOMElement "legend"
 
 li :: ElemFactory
-li = createElement "li"
+li = createDOMElement "li"
 
 link :: LeafFactory
 link = createLeafElement "link"
 
 main :: ElemFactory
-main = createElement "main"
+main = createDOMElement "main"
 
 mark :: ElemFactory
-mark = createElement "mark"
+mark = createDOMElement "mark"
 
 meter :: ElemFactory
-meter = createElement "meter"
+meter = createDOMElement "meter"
 
 nav :: ElemFactory
-nav = createElement "nav"
+nav = createDOMElement "nav"
 
 object :: ElemFactory
-object = createElement "object"
+object = createDOMElement "object"
 
 ol :: ElemFactory
-ol = createElement "ol"
+ol = createDOMElement "ol"
 
 optgroup :: ElemFactory
-optgroup = createElement "optgroup"
+optgroup = createDOMElement "optgroup"
 
 option :: ElemFactory
-option = createElement "option"
+option = createDOMElement "option"
 
 output :: ElemFactory
-output = createElement "output"
+output = createDOMElement "output"
 
 p :: ElemFactory
-p = createElement "p"
+p = createDOMElement "p"
 
 param :: LeafFactory
 param = createLeafElement "param"
 
 picture :: ElemFactory
-picture = createElement "picture"
+picture = createDOMElement "picture"
 
 pre :: ElemFactory
-pre = createElement "pre"
+pre = createDOMElement "pre"
 
 progress :: ElemFactory
-progress = createElement "progress"
+progress = createDOMElement "progress"
 
 q :: ElemFactory
-q = createElement "q"
+q = createDOMElement "q"
 
 rp :: ElemFactory
-rp = createElement "rp"
+rp = createDOMElement "rp"
 
 rt :: ElemFactory
-rt = createElement "rt"
+rt = createDOMElement "rt"
 
 ruby :: ElemFactory
-ruby = createElement "ruby"
+ruby = createDOMElement "ruby"
 
 s :: ElemFactory
-s = createElement "s"
+s = createDOMElement "s"
 
 samp :: ElemFactory
-samp = createElement "samp"
+samp = createDOMElement "samp"
 
 section :: ElemFactory
-section = createElement "section"
+section = createDOMElement "section"
 
 source :: LeafFactory
 source = createLeafElement "source"
 
 span :: ElemFactory
-span = createElement "span"
+span = createDOMElement "span"
 
 strong :: ElemFactory
-strong = createElement "strong"
+strong = createDOMElement "strong"
 
 style :: ElemFactory
-style = createElement "style"
+style = createDOMElement "style"
 
 sub :: ElemFactory
-sub = createElement "sub"
+sub = createDOMElement "sub"
 
 sup :: ElemFactory
-sup = createElement "sup"
+sup = createDOMElement "sup"
 
 summary :: ElemFactory
-summary = createElement "summary"
+summary = createDOMElement "summary"
 
 svg :: ElemFactory
-svg = createElement "svg"
+svg = createDOMElement "svg"
 
 table :: ElemFactory 
-table = createElement "table"
+table = createDOMElement "table"
 
 tbody :: ElemFactory
-tbody = createElement "tbody"
+tbody = createDOMElement "tbody"
 
 td :: ElemFactory
-td = createElement "td"
+td = createDOMElement "td"
 
 template :: ElemFactory
-template = createElement "template"
+template = createDOMElement "template"
 
 textarea :: ElemFactory 
-textarea = createElement "textarea"
+textarea = createDOMElement "textarea"
 
 tfoot :: ElemFactory
-tfoot = createElement "tfoot"
+tfoot = createDOMElement "tfoot"
 
 th :: ElemFactory 
-th = createElement "th"
+th = createDOMElement "th"
 
 thead :: ElemFactory 
-thead = createElement "thead"
+thead = createDOMElement "thead"
 
 time :: ElemFactory
-time = createElement "time"
+time = createDOMElement "time"
 
 title :: ElemFactory 
-title = createElement "title"
+title = createDOMElement "title"
 
 tr :: ElemFactory 
-tr = createElement "tr"
+tr = createDOMElement "tr"
 
 track :: LeafFactory
 track = createLeafElement "track"
 
 u :: ElemFactory
-u = createElement "u"
+u = createDOMElement "u"
 
 ul :: ElemFactory
-ul = createElement "ul"
+ul = createDOMElement "ul"
 
 var :: ElemFactory
-var = createElement "var"
+var = createDOMElement "var"
 
 video :: ElemFactory
-video = createElement "video"
+video = createDOMElement "video"
 
 wbr :: LeafFactory
 wbr = createLeafElement "wbr"
