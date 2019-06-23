@@ -109,23 +109,77 @@ let additions =
 -}
 
 let mkPackage =
-      https://raw.githubusercontent.com/purescript/package-sets/psc-0.12.4-20190413/src/mkPackage.dhall sha256:0b197efa1d397ace6eb46b243ff2d73a3da5638d8d0ac8473e8e4a8fc528cf57
+      https://raw.githubusercontent.com/purescript/package-sets/psc-0.13.0-20190614/src/mkPackage.dhall sha256:0b197efa1d397ace6eb46b243ff2d73a3da5638d8d0ac8473e8e4a8fc528cf57
 
 let upstream =
-      https://raw.githubusercontent.com/purescript/package-sets/psc-0.12.4-20190413/src/packages.dhall sha256:a63cc6dbd2190cc4d4f898e4db59281e4bbd09a022de6036e379bc991e23e705
+      https://raw.githubusercontent.com/purescript/package-sets/psc-0.12.5-20190419/src/packages.dhall sha256:aee7258b1bf1b81ed5e22d1247e812a80ec2e879758562f33334512ed086c5ae
 
-let overrides = {=}
+let overrides = 
+    { contravariant =
+        mkPackage
+	    [ "newtype", "either", "prelude", "tuples" ]
+	    "https://github.com/purescript/purescript-contravariant"
+	    "v4.0.1"
+    --    spec =
+    --       mkPackage
+    --       [ "aff"
+    --       , "ansi"
+    --       , "avar"
+    --       , "console"
+    --       , "exceptions"
+    --       , "foldable-traversable"
+    --       , "fork"
+    --       , "generics-rep"
+    --       , "now"
+    --       , "pipes"
+    --       , "prelude"
+    --       , "strings"
+    --       , "transformers"
+    --       ]
+    -- 	  "https://github.com/purescript-spec/purescript-spec.git"
+   	-- 	  "v3.1.0"
+    , ordered-collections =
+        mkPackage
+        [ "arrays"
+        , "foldable-traversable"
+        , "gen"
+        , "lists"
+        , "maybe"
+        , "partial"
+        , "prelude"
+        , "st"
+        , "tailrec"
+        , "tuples"
+        , "unfoldable"
+        , "unsafe-coerce"
+        ]
+        "https://github.com/purescript/purescript-ordered-collections.git"
+        "v1.6.1"
+}
 
 let additions =
       { dom-simple =
           mkPackage
-		  [ "console", "effect", "functions", "nullable", "prelude"
-		  , "spec", "spec-mocha", "unsafe-coerce" ]
-		  "https://github.com/irresponsible/purescript-dom-simple"
-		  "v0.2.1"
+          [ "console"
+          , "effect"
+          , "functions"
+          , "nullable"
+          , "prelude"
+          , "spec"
+          , "spec-mocha"
+          , "unsafe-coerce"
+          ]
+          "https://github.com/irresponsible/purescript-dom-simple"
+          "v0.2.1"
       , ffi-simple =
           mkPackage
-          [ "prelude", "effect", "maybe", "functions", "nullable", "unsafe-coerce" ]
+          [ "prelude"
+          , "effect"
+          , "maybe"
+          , "functions"
+          , "nullable"
+          , "unsafe-coerce"
+          ]
           "https://github.com/irresponsible/purescript-ffi-simple"
           "v0.2.4"
       , inflection =
@@ -133,17 +187,11 @@ let additions =
           [ "functions" ]
           "https://github.com/athanclark/purescript-inflection"
           "v1.0.0"
-
       , spec-mocha =
-	      mkPackage
-		  [ "console", "foldable-traversable", "exceptions", "spec" ]
-		  "https://github.com/purescript-spec/purescript-spec-mocha"
-		  "v3.0.0"
-      -- , spec-quickcheck =
-      --     mkPackage
-      --     [ "prelude", "aff", "random", "quickcheck", "spec" ]
-      --     "https://github.com/purescript-spec/purescript-spec-quickcheck"
-      --     "v3.1.0"
+          mkPackage
+          [ "console", "foldable-traversable", "exceptions", "spec" ]
+          "https://github.com/purescript-spec/purescript-spec-mocha"
+          "v3.0.0"
       }
 
 in  upstream // overrides // additions
