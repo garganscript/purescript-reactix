@@ -5,11 +5,13 @@ import Data.Array as A
 import Data.Array ( (!!) )
 import Data.EuclideanRing (mod)
 import Data.Maybe ( Maybe(..) )
+import Data.Nullable (null)
 import Data.Traversable ( traverse, traverse_, sequence_ )
 import Data.Tuple ( Tuple(..) )
 import Data.Tuple.Nested ( (/\) )
+import Data.Unfoldable (fromMaybe)
 import Effect ( Effect )
-import Effect.Aff ( Aff )
+import Effect.Aff ( Aff, launchAff )
 import Effect.Class ( liftEffect )
 import Effect.Ref as Ref
 import Effect.Uncurried ( EffectFn1, mkEffectFn1, runEffectFn1 )
@@ -20,7 +22,9 @@ import Test.Spec.Assertions ( shouldEqual )
 import DOM.Simple as DOM
 import DOM.Simple.Document as Document
 import DOM.Simple.Element as Element
+import DOM.Simple.Node as Node
 import DOM.Simple.Event as Event
+import DOM.Simple.Types (Element)
 import FFI.Simple (delay)
 import Reactix as R
 import Reactix.Test as RT
@@ -31,10 +35,22 @@ staticTest :: Spec Unit
 staticTest =
   describe "Basic DOM rendering" $ do
     it "Simple elements" $ do
-      root <- liftEffect $ RT.render elem
+      root <- liftEffect $ RT.render simple
       let children = Element.children root.container
       (Element.name <$> children) `shouldEqual` ["I"]
       (Element.innerHTML <$> children) `shouldEqual` ["hello world"]
+    it "Magic props" $ do
+      root <- liftEffect $ RT.render magic
+      let children = Element.children root.container
+      A.length children `shouldEqual` 1
+      let children2 = children >>= Element.children
+      let attrNames = A.sort (children >>= Element.attrNames)
+      let attrVals =
+            do name <- attrNames
+               child <- children
+               fromMaybe $ Element.attr child name
+      ["aria-label", "data-sample"] `shouldEqual` attrNames
+      ["example", "example"] `shouldEqual` attrVals
     it "Fragments" $ do
       root <- liftEffect $ RT.render $ frag
       Element.childCount root.container `shouldEqual` 2
@@ -42,8 +58,13 @@ staticTest =
       A.length children `shouldEqual` 2
       (Element.name <$> children) `shouldEqual` ["I", "I"]
       (Element.innerHTML <$> children) `shouldEqual` ["hello","world"]
-  where elem = i {} [ text "hello world" ]
-        frag = i {} [ text "hello" ] <> i {} [ text "world" ]
+   where
+     simple = i {} [ text "hello world" ]
+     magic = div {aria: {label: "example"}, "data": {sample: "example"}} []
+     frag = i {} [ text "hello" ] <> i {} [ text "world" ]
+
+getAttr :: String -> Element -> Maybe String
+getAttr = flip Element.attr
 
 type CounterProps = ( count :: Int )
 
@@ -53,9 +74,8 @@ counterCpt = R.hooksComponent "Counter" cpt
     cpt {count} _ = do
       y /\ setY <- R.useState' count
       pure $ div { className: "counter" }
-        [ button { type: "button",  onClick: onclick setY (_ + 1) } [ text "++" ]
+        [ button { type: "button", on: { click: \_ -> setY (_ + 1) } } [ text "++" ]
         , div {} [ text (show y) ] ]
-    onclick set to = mkEffectFn1 $ \e -> set to
 
 counterTest :: Spec Unit
 counterTest =
@@ -95,10 +115,9 @@ bicounterCpt = R.hooksComponent "Bicounter" cpt
     cpt {count} _ = do
       y /\ reduceY <- R.useReducer' reduce count
       pure $ div { className: "counter" }
-        [ button { type: "button",  onClick: onclick reduceY Inc } [ text "++" ]
-        , button { type: "button",  onClick: onclick reduceY Dec } [ text "--" ]
+        [ button { type: "button",  on: { click: \_ -> reduceY Inc } } [ text "++" ]
+        , button { type: "button",  on: { click: \_ -> reduceY Dec } } [ text "--" ]
         , div {} [ text (show y) ] ]
-    onclick reducer with = mkEffectFn1 $ \_ -> reducer with
     reduce count Inc = count + 1
     reduce count Dec = count - 1
 
@@ -228,11 +247,17 @@ themeChooserCpt = R.hooksComponent "ThemeChooser" cpt
       let context = R.readRef ref
       pure $
         div {}
-        [ button { type: "button",  onClick: onclick setTheme (const Nothing) } [ text "None" ]
-        , button { type: "button",  onClick: onclick setTheme (const $ Just Dark) } [ text "Dark" ]
-        , button { type: "button",  onClick: onclick setTheme (const $ Just Light) } [ text "Light" ]
+        [ button
+            { type: "button",  on: {click: \_ ->  setTheme (const Nothing) } }
+            [ text "None" ]
+        , button
+            { type: "button",  on: {click: \_ ->  setTheme (const $ Just Dark) } }
+            [ text "Dark" ]
+        , button
+            { type: "button",  on: {click: \_ -> setTheme (const $ Just Light) } }
+            [ text "Light" ]
         , R.provideContext context theme [ R.createElement themedCpt { theme: context } [] ] ]
-    onclick setTheme theme = mkEffectFn1 $ \_ -> setTheme theme
+
 themeChooserTest :: Spec Unit
 themeChooserTest =
   describe "ThemeChooser" do

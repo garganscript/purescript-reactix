@@ -100,6 +100,30 @@ Breaking:
 * `useEffect`, `useLayoutEffect` and their numbered variants no longer
   take a redundant dummy unit value to delay computation.
 
+New:
+
+* 'Magic' DOM Props. Each takes a record of props which will be transformed
+  * `aria` - prop names will be prefixed with `aria-`
+  * `data` - prop names will be prefixed with `data-`
+  * `on` - prop names will be prefixed with `on`, values will be `mkEffectFn1`'d
+
+Example:
+
+```purescript
+import Reactix as R
+import Reactix.DOM.HTML (div, text)
+import DOM.Simple.Console (log)
+
+ex :: R.Element
+ex =
+  div
+    { aria: {label: "example"}
+    , data: {thing: Just 1}
+    , on: {click: \_ -> log "Hello World"}
+    }
+    [ text "Hello World" ]
+```
+
 ### 0.3.1
 
 Bug Fixes:

@@ -1,8 +1,10 @@
 module Reactix.Utils where
 
+import Prelude ((<<<), (<>))
 import Data.Unit (Unit, unit)
 import Data.Tuple (Tuple(..))
 import Data.Function.Uncurried (Fn2, runFn2)
+import Data.String (splitAt, toUpper)
 import Effect (Effect)
 import Effect.Uncurried (EffectFn1, runEffectFn1)
 import FFI.Simple (delay)
@@ -18,3 +20,7 @@ currySecond (Tuple a b) = Tuple a (runEffectFn1 b)
 
 hook :: forall v. (Unit -> Effect v) -> Hooks v
 hook f = unsafeHooksEffect (delay unit f)
+
+ucFirst :: String -> String
+ucFirst = help <<< splitAt 1
+  where help {before, after} = toUpper before <> after
