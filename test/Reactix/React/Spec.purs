@@ -21,6 +21,7 @@ import DOM.Simple as DOM
 import DOM.Simple.Document as Document
 import DOM.Simple.Element as Element
 import DOM.Simple.Event as Event
+import FFI.Simple (delay)
 import Reactix as R
 import Reactix.Test as RT
 import Reactix.DOM.HTML ( button, div, i, text )
@@ -50,9 +51,9 @@ counterCpt :: R.Component CounterProps
 counterCpt = R.hooksComponent "Counter" cpt
   where
     cpt {count} _ = do
-      y /\ setY <- R.useState $ \_ -> pure count
+      y /\ setY <- R.useState' count
       pure $ div { className: "counter" }
-        [ button { type: "button",  onClick: onclick setY (y + 1) } [ text "++" ]
+        [ button { type: "button",  onClick: onclick setY (_ + 1) } [ text "++" ]
         , div {} [ text (show y) ] ]
     onclick set to = mkEffectFn1 $ \e -> set to
 
@@ -148,9 +149,9 @@ type EffectorProps = ( stateRef :: Ref.Ref EffectorState )
 effectorCpt :: R.Component EffectorProps
 effectorCpt = R.hooksComponent "Effector" cpt
   where cpt {stateRef} _ = do
-          R.useEffect $ \_ -> do
+          R.useEffect $ do
             Ref.write Initialised stateRef
-            pure $ \_ -> Ref.write Done stateRef
+            pure $ Ref.write Done stateRef
           pure $ div {} []
 
 -- TODO: test it's firing at the right time
@@ -176,9 +177,9 @@ effectorTest =
 layoutEffectorCpt :: R.Component EffectorProps
 layoutEffectorCpt = R.hooksComponent "LayoutEffector" cpt
   where cpt {stateRef} _ = do
-          R.useLayoutEffect $ \_ -> do
+          R.useLayoutEffect $ do
             Ref.write Initialised stateRef
-            pure $ \_ -> Ref.write Done stateRef
+            pure $ delay unit $ \_ -> Ref.write Done stateRef
           pure $ div {} []
 
 -- TODO: test it's firing at the right time
@@ -222,14 +223,14 @@ themeChooserCpt :: R.Component ThemeChooserProps
 themeChooserCpt = R.hooksComponent "ThemeChooser" cpt
   where
     cpt props _ = do
-      theme /\ setTheme <- R.useState' $ Nothing
+      theme /\ setTheme <- R.useState' Nothing
       ref <- R.useRef $ R.createContext Nothing
       let context = R.readRef ref
       pure $
         div {}
-        [ button { type: "button",  onClick: onclick setTheme Nothing } [ text "None" ]
-        , button { type: "button",  onClick: onclick setTheme (Just Dark) } [ text "Dark" ]
-        , button { type: "button",  onClick: onclick setTheme (Just Light) } [ text "Light" ]
+        [ button { type: "button",  onClick: onclick setTheme (const Nothing) } [ text "None" ]
+        , button { type: "button",  onClick: onclick setTheme (const $ Just Dark) } [ text "Dark" ]
+        , button { type: "button",  onClick: onclick setTheme (const $ Just Light) } [ text "Light" ]
         , R.provideContext context theme [ R.createElement themedCpt { theme: context } [] ] ]
     onclick setTheme theme = mkEffectFn1 $ \_ -> setTheme theme
 themeChooserTest :: Spec Unit

@@ -66,7 +66,6 @@ Not in any particular order
 
 1. Safe DOM props:
   * Make sure each element only takes the correct props
-  * Translate some props with minimal and efficient wrapping
 2. Refs
   * Test forwardRef
 3. Context
@@ -89,6 +88,24 @@ Not in any particular order
 <!-- * `R.React.provide` - provider a value through a `Provider` -->
 <!-- * `R.React.consume` - consume a value through a `Consumer` -->
 
+### 0.4.0
+
+Breaking:
+
+* `useState` now takes a (pure) `Unit -> s` initialiser
+* `useState`'s setter function now takes a pure fn `state -> state`.
+  To get back the old behaviour of setting a value without
+  regard to its existing value, use `const`.
+* `useReducer` now takes a (pure) `i -> s` initialiser
+* `useEffect`, `useLayoutEffect` and their numbered variants no longer
+  take a redundant dummy unit value to delay computation.
+
+### 0.3.1
+
+Bug Fixes:
+
+* `R.DOM.HTML` - more or less everything was broken since we moved out `createDOMElement`
+
 ### 0.3.0
 
 Newly supported hooks and variants:
@@ -108,6 +125,11 @@ Newly supported functions:
 * `R.React.consumer` - get a `Consumer` for a `Context`
 * `R.Hooks.nothing` - an empty cleanup function
 * `R.Hooks.thenNothing` - make an effect function return an empty cleanup function
+
+Changes:
+
+* `R.createDOMElement` is now how you create DOM elements, we removed
+  the `R.IsComponent` instance for `String`
 
 Bug Fixes:
 
@@ -145,6 +167,13 @@ Supported Hooks:
 Notable changes:
 
 * Major refactor to use [ffi-simple](https://github.com/irresponsible/purescript-ffi-simple).
+
+## Thanks
+
+- [Nicolas Pouillard](https://github.com/np), for the discussions that
+  continue to shape the design of reactix.
+- The rest of the [gargantext](https://gitlab.iscpif.fr/gargantext/purescript-gargantext)
+  team, for their enthusiasm both for reactix and for replacing thermite.
 
 ## Copyright and License
 
