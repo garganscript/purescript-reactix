@@ -12,6 +12,7 @@
     , "newtype"
     , "nullable"
     , "prelude"
+    , "psci-support"
     , "refs"
     , "spec"
     , "spec-mocha"
