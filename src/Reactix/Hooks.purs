@@ -5,15 +5,18 @@ module Reactix.Hooks
   , useRef
   , useDebugValue, useDebugValue'
   , nothing, thenNothing
-  , useEffect,  useEffect',  useEffect1, useEffect1'
-  , useEffect2, useEffect2', useEffect3, useEffect3'
-  , useEffect4, useEffect4', useEffect5, useEffect5'
+  , useEffect,  useEffect'
+  , useEffect1, useEffect1', useEffectFn1, useEffectFn1'
+  , useEffect2, useEffect2', useEffectFn2, useEffectFn2'
+  , useEffect3, useEffect3', useEffectFn3, useEffectFn3'
+  , useEffect4, useEffect4', useEffectFn4, useEffectFn4'
+  , useEffect5, useEffect5', useEffectFn5, useEffectFn5'
   , useLayoutEffect,  useLayoutEffect'
-  , useLayoutEffect1, useLayoutEffect1'
-  , useLayoutEffect2, useLayoutEffect2'
-  , useLayoutEffect3, useLayoutEffect3'
-  , useLayoutEffect4, useLayoutEffect4'
-  , useLayoutEffect5, useLayoutEffect5'
+  , useLayoutEffect1, useLayoutEffect1', useLayoutEffectFn1, useLayoutEffectFn1'
+  , useLayoutEffect2, useLayoutEffect2', useLayoutEffectFn2, useLayoutEffectFn2'
+  , useLayoutEffect3, useLayoutEffect3', useLayoutEffectFn3, useLayoutEffectFn3'
+  , useLayoutEffect4, useLayoutEffect4', useLayoutEffectFn4, useLayoutEffectFn4'
+  , useLayoutEffect5, useLayoutEffect5', useLayoutEffectFn5, useLayoutEffectFn5'
   , useMemo, useMemo1, useMemo2, useMemo3, useMemo4, useMemo5
   , useCallback,  useCallback1, useCallback2
   , useCallback3, useCallback4, useCallback5
@@ -22,7 +25,7 @@ module Reactix.Hooks
   )
  where
 
-import Prelude
+import Prelude hiding (div)
 import Data.Function.Uncurried (Fn2, mkFn2, runFn2)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -33,12 +36,10 @@ import Effect.Uncurried
 import FFI.Simple ((...), (..), delay, args2, args3, args4, args5, setProperty)
 import FFI.Simple.PseudoArray as Array
 import DOM.Simple.Console 
-import Reactix.Utils (tuple, currySecond, hook)
+import Reactix.Utils (tuple, currySecond, hook, splay1, splay2, splay3, splay4, splay5)
 import Reactix.React (Context, Ref, Hooks, react, unsafeHooksEffect)
 
 --- useState
-
-
 
 -- | A state hook is a tuple of value and setter
 type State state = Tuple state ((state -> state) -> Effect Unit)
@@ -50,7 +51,7 @@ useState s =
     pure $ currySecond $ tuple $ react ... "useState" $ [ delay unit (pure <<< s) ]
 
 useState' :: forall s. s -> Hooks (State s)
-useState' s = useState $ const s
+useState' = useState <<< const
 -- useReducer
 
 -- | A reducer hook is a tuple of value and reducer-setter
@@ -154,6 +155,47 @@ useEffect4' a b c d = useEffect4 a b c d <<< thenNothing
 useEffect5' :: forall a b c d e f. a -> b -> c -> d -> e -> Effect f -> Hooks Unit
 useEffect5' a b c d e = useEffect5 a b c d e <<< thenNothing
 
+-- | Like useEffect1, but takes a function from memo value to effect
+useEffectFn1 :: forall a. a -> (a -> Effect (Effect Unit)) -> Hooks Unit
+useEffectFn1 a f = splay1 useEffect1 f a
+
+-- | like useEffectFn1, but with two memo values
+useEffectFn2 :: forall a b. a -> b -> (a -> b -> Effect (Effect Unit)) -> Hooks Unit
+useEffectFn2 a b f = splay2 useEffect2 f a b
+
+-- | like useEffectFn1, but with three memo values
+useEffectFn3 :: forall a b c. a -> b -> c -> (a -> b -> c -> Effect (Effect Unit)) -> Hooks Unit
+useEffectFn3 a b c f = splay3 useEffect3 f a b c
+
+-- | like useEffectFn1, but with four memo values
+useEffectFn4 :: forall a b c d. a -> b -> c -> d -> (a -> b -> c -> d -> Effect (Effect Unit)) -> Hooks Unit
+useEffectFn4 a b c d f = splay4 useEffect4 f a b c d
+
+-- | like useEffectFn1, but with five memo values
+useEffectFn5 :: forall a b c d e. a -> b -> c -> d -> e -> (a -> b -> c -> d -> e -> Effect (Effect Unit)) -> Hooks Unit
+useEffectFn5 a b c d e f = splay5 useEffect5 f a b c d e
+
+-- | Like useEffect1', but takes a function from memo value to effect
+useEffectFn1' :: forall a. a -> (a -> Effect Unit) -> Hooks Unit
+useEffectFn1' a f = splay1 useEffect1' f a
+
+-- | like useEffectFn1', but with two memo values
+useEffectFn2' :: forall a b. a -> b -> (a -> b -> Effect Unit) -> Hooks Unit
+useEffectFn2' a b f = splay2 useEffect2' f a b
+
+-- | like useEffectFn1', but with three memo values
+useEffectFn3' :: forall a b c. a -> b -> c -> (a -> b -> c -> Effect Unit) -> Hooks Unit
+useEffectFn3' a b c f = splay3 useEffect3' f a b c
+
+-- | like useEffectFn1', but with four memo values
+useEffectFn4' :: forall a b c d. a -> b -> c -> d -> (a -> b -> c -> d -> Effect Unit) -> Hooks Unit
+useEffectFn4' a b c d f = splay4 useEffect4' f a b c d
+
+-- | like useEffectFn1', but with five memo values
+useEffectFn5' :: forall a b c d e. a -> b -> c -> d -> e -> (a -> b -> c -> d -> e -> Effect Unit) -> Hooks Unit
+useEffectFn5' a b c d e f = splay5 useEffect5' f a b c d e
+
+
 -- useLayoutEffect
 
 -- | Given an Effect function which returns a cleanup Effect function,
@@ -190,19 +232,19 @@ useLayoutEffect' = useLayoutEffect <<< thenNothing
 useLayoutEffect1' :: forall a b. a -> Effect b -> Hooks Unit
 useLayoutEffect1' a = useLayoutEffect1 a <<< thenNothing
 
--- | Like useLayoutEffect2, but the provided Effect fn does not return a cleanup handler
+-- | Like useLayoutEffect1' but with 2 memo values
 useLayoutEffect2' :: forall a b c. a -> b -> Effect c -> Hooks Unit
 useLayoutEffect2' a b = useLayoutEffect2 a b <<< thenNothing
 
--- | Like useLayoutEffect3, but the provided Effect fn does not return a cleanup handler
+-- | Like useLayoutEffect1' but with 3 memo values
 useLayoutEffect3' :: forall a b c d. a -> b -> c -> Effect d -> Hooks Unit
 useLayoutEffect3' a b c = useLayoutEffect3 a b c <<< thenNothing
 
--- | Like useLayoutEffect4, but the provided Effect fn does not return a cleanup handler
+-- | Like useLayoutEffect1' but with 4 memo values
 useLayoutEffect4' :: forall a b c d e. a -> b -> c -> d -> Effect e -> Hooks Unit
 useLayoutEffect4' a b c d = useLayoutEffect4 a b c d <<< thenNothing
 
--- | Like useLayoutEffect5, but the provided Effect fn does not return a cleanup handler
+-- | Like useLayoutEffect1' but with 5 memo values
 useLayoutEffect5' :: forall a b c d e f. a -> b -> c -> d -> e -> Effect f -> Hooks Unit
 useLayoutEffect5' a b c d f = useLayoutEffect5 a b c d f <<< thenNothing
 
@@ -211,6 +253,48 @@ _useLayoutEffect e a =
   hook $ \_ ->
     pure $ react ... "useLayoutEffect" $
       args2 e (Array.from a)
+
+-- | Like useLayoutEffect1, but takes a function from memo value to effect
+useLayoutEffectFn1 :: forall a. a -> (a -> Effect (Effect Unit)) -> Hooks Unit
+useLayoutEffectFn1 a f = splay1 useLayoutEffect1 f a
+
+-- | like useLayoutEffectFn1, but with two memo values
+useLayoutEffectFn2 :: forall a b. a -> b -> (a -> b -> Effect (Effect Unit)) -> Hooks Unit
+useLayoutEffectFn2 a b f = splay2 useLayoutEffect2 f a b
+
+-- | like useLayoutEffectFn1, but with three memo values
+useLayoutEffectFn3 :: forall a b c. a -> b -> c -> (a -> b -> c -> Effect (Effect Unit)) -> Hooks Unit
+useLayoutEffectFn3 a b c f = splay3 useLayoutEffect3 f a b c
+
+-- | like useLayoutEffectFn1, but with four memo values
+useLayoutEffectFn4 :: forall a b c d. a -> b -> c -> d -> (a -> b -> c -> d -> Effect (Effect Unit)) -> Hooks Unit
+useLayoutEffectFn4 a b c d f = splay4 useLayoutEffect4 f a b c d
+
+-- | like useLayoutEffectFn1, but with five memo values
+useLayoutEffectFn5 :: forall a b c d e. a -> b -> c -> d -> e -> (a -> b -> c -> d -> e -> Effect (Effect Unit)) -> Hooks Unit
+useLayoutEffectFn5 a b c d e f = splay5 useLayoutEffect5 f a b c d e
+
+-- | Like useLayoutEffect1, but takes a function from memo value to effect
+useLayoutEffectFn1' :: forall a. a -> (a -> Effect Unit) -> Hooks Unit
+useLayoutEffectFn1' a f = splay1 useLayoutEffect1' f a
+
+-- | like useLayoutEffectFn1', but with two memo values
+useLayoutEffectFn2' :: forall a b. a -> b -> (a -> b -> Effect Unit) -> Hooks Unit
+useLayoutEffectFn2' a b f = splay2 useLayoutEffect2' f a b
+
+-- | like useLayoutEffectFn1', but with three memo values
+useLayoutEffectFn3' :: forall a b c. a -> b -> c -> (a -> b -> c -> Effect Unit) -> Hooks Unit
+useLayoutEffectFn3' a b c f = splay3 useLayoutEffect3' f a b c
+
+-- | like useLayoutEffectFn1', but with four memo values
+useLayoutEffectFn4' :: forall a b c d. a -> b -> c -> d -> (a -> b -> c -> d -> Effect Unit) -> Hooks Unit
+useLayoutEffectFn4' a b c d f = splay4 useLayoutEffect4' f a b c d
+
+-- | like useLayoutEffectFn1', but with five memo values
+useLayoutEffectFn5' :: forall a b c d e. a -> b -> c -> d -> e -> (a -> b -> c -> d -> e -> Effect Unit) -> Hooks Unit
+useLayoutEffectFn5' a b c d e f = splay5 useLayoutEffect5' f a b c d e
+
+
 
 -- useMemo
 

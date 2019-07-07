@@ -24,3 +24,24 @@ hook f = unsafeHooksEffect (delay unit f)
 ucFirst :: String -> String
 ucFirst = help <<< splitAt 1
   where help {before, after} = toUpper before <> after
+
+-- I'm not quite sure of the type of this. Purescript "helpfully" says it's:
+-- forall t202 t203 t205 t206. (t203 -> t205 -> t206) -> (t202 -> t203) -> ... -> ...
+onemore s f g a = s (f a) (g a)
+
+-- Aka the `s` combinator from the SKI calculus
+splay1 :: forall a b c. (a -> b -> c) -> (a -> b) -> a -> c
+splay1 c f v = c v (f v)
+
+splay2 :: forall a b c d. (a -> b -> c -> d) -> (a -> b -> c) -> a -> b -> d
+splay2 = onemore splay1
+
+splay3 :: forall a b c d e. (a -> b -> c -> d -> e) -> (a -> b -> c -> d) -> a -> b -> c -> e
+splay3 = onemore splay2
+
+splay4 :: forall a b c d e f. (a -> b -> c -> d -> e -> f) -> (a -> b -> c -> d -> e) -> a -> b -> c -> d -> f
+splay4 = onemore splay3
+
+splay5 :: forall a b c d e f g. (a -> b -> c -> d -> e -> f -> g) -> (a -> b -> c -> d -> e -> f) -> a -> b -> c -> d -> e -> g
+splay5 = onemore splay4
+

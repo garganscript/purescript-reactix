@@ -88,6 +88,13 @@ Not in any particular order
 <!-- * `R.React.provide` - provider a value through a `Provider` -->
 <!-- * `R.React.consume` - consume a value through a `Consumer` -->
 
+### 0.4.1
+
+New:
+
+* `useEffectFn{1-5}` (+ layout and prime variants) - variants taking
+  functions from memo values to effect, to better aid code reuse
+
 ### 0.4.0
 
 Breaking:
