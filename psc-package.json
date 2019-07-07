@@ -8,7 +8,6 @@
     , "effect"
     , "ffi-simple"
     , "functions"
-    , "inflection"
     , "newtype"
     , "nullable"
     , "prelude"
