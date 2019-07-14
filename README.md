@@ -72,6 +72,7 @@ Not in any particular order
   * Test consumer (we only test useContext right now)
 4. Misc hooks
   * Test useEffect/useLayoutEffect are fired at the correct stage
+  * Test useEffectOnce/useLayoutEffectOnce are fired once
   * Test useMemo/useCallback
   * Test useImperativeHandle
   * Test useDebugValue
@@ -87,6 +88,17 @@ Not in any particular order
 <!-- * `R.React.consumeContext` -->
 <!-- * `R.React.provide` - provider a value through a `Provider` -->
 <!-- * `R.React.consume` - consume a value through a `Consumer` -->
+
+### 0.4.2
+
+New:
+
+* `useEffectOnce` (+ layout and prime variants) - effects which run
+  once at component mount and cleanup once at component dismount.
+* `unsafeUseEffect`, `unsafeUseLayoutEffect`, `unsafeUseMemo`,
+  `unsafeUseCallback`, `unsafeUseImperativeHandle` - unsafe hook
+  variants where you pass an array-like object of memo values without
+  any help from the type system to assert such likeness to an array.
 
 ### 0.4.1
 
