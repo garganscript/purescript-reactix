@@ -1,35 +1,35 @@
 module Reactix.React.Spec where
 
-import Prelude
+import Prelude hiding ( div )
 import Data.Array as A
 import Data.Array ( (!!) )
-import Data.EuclideanRing (mod)
+-- import Data.EuclideanRing (mod)
 import Data.Maybe ( Maybe(..) )
-import Data.Nullable (null)
-import Data.Traversable ( traverse, traverse_, sequence_ )
-import Data.Tuple ( Tuple(..) )
+-- import Data.Nullable (null)
+import Data.Traversable ( traverse_, sequence_ )
+-- import Data.Tuple ( Tuple(..) )
 import Data.Tuple.Nested ( (/\) )
 import Data.Unfoldable (fromMaybe)
-import Effect ( Effect )
-import Effect.Aff ( Aff, launchAff )
+-- import Effect ( Effect )
+import Effect.Aff ( Aff )
 import Effect.Class ( liftEffect )
 import Effect.Ref as Ref
-import Effect.Uncurried ( EffectFn1, mkEffectFn1, runEffectFn1 )
+-- import Effect.Uncurried ( EffectFn1, mkEffectFn1, runEffectFn1 )
 -- import Effect.Aff (launchAff_)
 import Test.Spec ( Spec, describe, it )
 import Test.Spec.Assertions ( shouldEqual )
 -- import Test.Spec.QuickCheck (quickCheck')
-import DOM.Simple as DOM
-import DOM.Simple.Document as Document
+-- import DOM.Simple as DOM
+-- import DOM.Simple.Document as Document
 import DOM.Simple.Element as Element
-import DOM.Simple.Node as Node
-import DOM.Simple.Event as Event
+-- import DOM.Simple.Node as Node
+-- import DOM.Simple.Event as Event
 import DOM.Simple.Types (Element)
 import FFI.Simple (delay)
 import Reactix as R
 import Reactix.Test as RT
 import Reactix.DOM.HTML ( button, div, i, text )
-import DOM.Simple.Console
+-- import DOM.Simple.Console
 
 staticTest :: Spec Unit
 staticTest =

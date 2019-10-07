@@ -109,53 +109,35 @@ let additions =
 -}
 
 let mkPackage =
-      https://raw.githubusercontent.com/purescript/package-sets/psc-0.13.0-20190614/src/mkPackage.dhall sha256:0b197efa1d397ace6eb46b243ff2d73a3da5638d8d0ac8473e8e4a8fc528cf57
+      https://raw.githubusercontent.com/purescript/package-sets/psc-0.13.3-20191005/src/mkPackage.dhall sha256:0b197efa1d397ace6eb46b243ff2d73a3da5638d8d0ac8473e8e4a8fc528cf57
 
 let upstream =
-      https://raw.githubusercontent.com/purescript/package-sets/psc-0.12.5-20190419/src/packages.dhall sha256:aee7258b1bf1b81ed5e22d1247e812a80ec2e879758562f33334512ed086c5ae
+      https://raw.githubusercontent.com/purescript/package-sets/psc-0.13.3-20191005/src/packages.dhall sha256:ba287d858ada09c4164792ad4e643013b742c208cbedf5de2e35ee27b64b6817
 
-let overrides = 
-    { contravariant =
-        mkPackage
-	    [ "newtype", "either", "prelude", "tuples" ]
-	    "https://github.com/purescript/purescript-contravariant"
-	    "v4.0.1"
-    --    spec =
-    --       mkPackage
-    --       [ "aff"
-    --       , "ansi"
-    --       , "avar"
-    --       , "console"
-    --       , "exceptions"
-    --       , "foldable-traversable"
-    --       , "fork"
-    --       , "generics-rep"
-    --       , "now"
-    --       , "pipes"
-    --       , "prelude"
-    --       , "strings"
-    --       , "transformers"
-    --       ]
-    -- 	  "https://github.com/purescript-spec/purescript-spec.git"
-   	-- 	  "v3.1.0"
-    , ordered-collections =
-        mkPackage
-        [ "arrays"
-        , "foldable-traversable"
-        , "gen"
-        , "lists"
-        , "maybe"
-        , "partial"
-        , "prelude"
-        , "st"
-        , "tailrec"
-        , "tuples"
-        , "unfoldable"
-        , "unsafe-coerce"
-        ]
-        "https://github.com/purescript/purescript-ordered-collections.git"
-        "v1.6.1"
-}
+let overrides =
+      { contravariant =
+          mkPackage
+          [ "newtype", "either", "prelude", "tuples" ]
+          "https://github.com/purescript/purescript-contravariant"
+          "v4.0.1"
+      , ordered-collections =
+          mkPackage
+          [ "arrays"
+          , "foldable-traversable"
+          , "gen"
+          , "lists"
+          , "maybe"
+          , "partial"
+          , "prelude"
+          , "st"
+          , "tailrec"
+          , "tuples"
+          , "unfoldable"
+          , "unsafe-coerce"
+          ]
+          "https://github.com/purescript/purescript-ordered-collections.git"
+          "v1.6.1"
+      }
 
 let additions =
       { dom-simple =
@@ -191,7 +173,7 @@ let additions =
           mkPackage
           [ "console", "foldable-traversable", "exceptions", "spec" ]
           "https://github.com/purescript-spec/purescript-spec-mocha"
-          "v3.0.0"
+          "v4.0.0"
       }
 
 in  upstream // overrides // additions
