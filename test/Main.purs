@@ -1,19 +1,15 @@
 module Test.Main where
 
-import Prelude
+import Prelude (Unit, identity, pure)
+import Data.Identity (Identity(..))
 import Effect (Effect)
-import Test.Spec (Spec, describe, it)
-import Test.Spec.Assertions (shouldEqual)
+import Test.Spec (Spec, mapSpecTree)
 import Test.Spec.Mocha (runMocha)
-import Reactix.React.Spec
-import Test.Spec.Runner (run)
 
 import Reactix.React.Spec as ReactSpec
 
 specs :: Spec Unit
-specs = do ReactSpec.spec
+specs = ReactSpec.spec
 
 main :: Effect Unit
-main = do --  >>= run [consoleReporter]
-  -- specs <- discoverSpecs
-  runMocha specs
+main = runMocha (mapSpecTree (\(Identity a) -> pure a) identity specs)

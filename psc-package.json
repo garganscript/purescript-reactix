@@ -2,18 +2,19 @@
   "name": "reactix",
   "set": "local",
   "source": ".psc-package",
-  "depends":
-    [ "aff"
-    , "dom-simple"
-    , "effect"
-    , "ffi-simple"
-    , "functions"
-    , "newtype"
-    , "nullable"
-    , "prelude"
-    , "psci-support"
-    , "refs"
-    , "spec"
-    , "spec-mocha"
-    , "unsafe-coerce" ]
+  "depends": [
+    "aff",
+    "dom-simple",
+    "effect",
+    "ffi-simple",
+    "functions",
+    "newtype",
+    "nullable",
+    "prelude",
+    "psci-support",
+    "refs",
+    "spec",
+    "spec-mocha",
+    "unsafe-coerce"
+  ]
 }
