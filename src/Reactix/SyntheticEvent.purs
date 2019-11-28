@@ -3,12 +3,8 @@ module Reactix.SyntheticEvent where
 
 import Prelude
 import DOM.Simple as DOM
-import DOM.Simple.Event as E
-import DOM.Simple.Event
-  ( class IsEvent, class IsMouseEvent, class HasModifierKeys
-  , KeyboardEvent, MouseEvent, MouseButtonEvent, TouchEvent )
+import DOM.Simple.Event (class HasModifierKeys, class IsEvent, class IsMouseEvent, KeyboardEvent, MouseButtonEvent)
 import Effect ( Effect )
-import Effect.Uncurried ( EffectFn1, runEffectFn1 )
 import FFI.Simple ( (..), (...), delay )
 
 foreign import data SyntheticEvent :: Type -> Type
@@ -34,7 +30,7 @@ timestamp e = e .. "timeStamp"
 type' :: forall e. IsEvent e => SyntheticEvent e -> String
 type' e = e .. "type"
 
-target :: forall e t. IsEvent e => SyntheticEvent e -> DOM.Element
+target :: forall e. IsEvent e => SyntheticEvent e -> DOM.Element
 target e = e .. "target"
 
 currentTarget :: forall e. IsEvent e => SyntheticEvent e -> DOM.Element

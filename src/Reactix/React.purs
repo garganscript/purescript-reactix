@@ -24,18 +24,13 @@ module Reactix.React
 
 import Prelude
 import Data.Function.Uncurried (mkFn2)
-import Data.Maybe (Maybe, maybe)
+import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
 import Effect (Effect)
-import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Uncurried (EffectFn1, mkEffectFn1, EffectFn2)
-import Unsafe.Coerce (unsafeCoerce)
-import Prim.Row (class Lacks)
+import Effect.Uncurried (EffectFn1, mkEffectFn1)
 import DOM.Simple as DOM
 import FFI.Simple.PseudoArray as PA
-import FFI.Simple
-  ( (..), (...), (.=), args2, args3, delay, setProperty, defineProperty )
-import FFI.Simple.Undef (nullUndef)
+import FFI.Simple (args2, defineProperty, delay, (..), (...), (.=))
 
 foreign import data React :: Type
 foreign import data ReactDOM :: Type

@@ -6,14 +6,12 @@ module Reactix.Test
   , cleanup
   ) where
 
-import Prelude
+import Prelude (Unit, pure, unit, ($))
 import Effect ( Effect )
-import Effect.Uncurried ( EffectFn1, runEffectFn1, EffectFn2, runEffectFn2 )
-import Data.Function.Uncurried ( Fn2, runFn2 )
+import Effect.Uncurried (runEffectFn1)
 import DOM.Simple as DOM
-import Reactix.React ( react, Element )
+import Reactix.React (Element)
 import FFI.Simple ( (..), (...), delay )
-import DOM.Simple.Console
 
 foreign import data TestUtils :: Type
 

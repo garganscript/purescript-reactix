@@ -1,9 +1,8 @@
 module Reactix.DOM.HTML where
 
-import Prelude ((<<<), ($), (<>), map, identity)
+import Prelude (identity, ($), (<<<), (<>))
 import Data.Maybe (maybe)
 import Data.Foldable (foldl)
-import Data.String (toUpper)
 import Effect.Uncurried (mkEffectFn1)
 import FFI.Simple.Objects ((.?), (.=), (!-), (..), keys)
 import Reactix.React (Element, createDOMElement)
@@ -11,7 +10,7 @@ import Reactix.Utils (ucFirst)
 import Unsafe.Coerce (unsafeCoerce)
 
 createDOM :: forall props. String -> Record props -> Array Element -> Element
-createDOM e p = createDOMElement e (magicProps p)
+createDOM e props = createDOMElement e (magicProps props)
 
 magicProps :: forall props. props -> props
 magicProps = xformAriaProps <<< xformDataProps <<< xformEventProps
@@ -20,8 +19,8 @@ magicProps = xformAriaProps <<< xformDataProps <<< xformEventProps
     xformDataProps = magicPrefixProp "data" "data-"
 
 magicPrefixProp :: forall props. String -> String -> props -> props
-magicPrefixProp prop pre props = maybe props help (props .? prop)
-  where help val = prefixCopyAll pre props val !- prop
+magicPrefixProp prop pre' props = maybe props help (props .? prop)
+  where help val = prefixCopyAll pre' props val !- prop
 
 xformEventProps :: forall props. props -> props
 xformEventProps props = maybe props help (props .? "on")
@@ -30,14 +29,14 @@ xformEventProps props = maybe props help (props .? "on")
     eventPropName other = "on" <> ucFirst other
 
 prefixCopyAll :: forall p q. String -> p -> q -> p
-prefixCopyAll pre = mapCopyAll (pre <> _) identity
+prefixCopyAll pre' = mapCopyAll (pre' <> _) identity
 
 mapCopyAll :: forall a b p q. (String -> String) -> (a -> b) -> p -> q -> p
 mapCopyAll xf yf dest src = foldl f dest (keys src)
-  where f dest k = (dest .= xf k) (yf $ src .. k)
+  where f dest' k = (dest' .= xf k) (yf $ src .. k)
 
 createLeafDOM :: forall props. String -> Record props -> Element
-createLeafDOM e p = createDOM e p []
+createLeafDOM e props = createDOM e props []
 
 -- A factory function for a DOM element with no children
 type LeafFactory = forall props. Record props -> Element

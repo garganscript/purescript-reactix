@@ -31,19 +31,14 @@ module Reactix.Hooks
   )
  where
 
-import Prelude hiding (div)
-import Data.Function.Uncurried (Fn2, mkFn2, runFn2)
-import Data.Tuple (Tuple(..))
+import Prelude (Unit, const, identity, pure, unit, ($), (*>), (<<<))
+import Data.Function.Uncurried (mkFn2)
+import Data.Tuple (Tuple)
 import Effect (Effect)
-import Effect.Uncurried
-  ( EffectFn1, runEffectFn1, mkEffectFn1
-  , EffectFn2, runEffectFn2, EffectFn3, runEffectFn3
-  , EffectFn4, runEffectFn4, EffectFn5, runEffectFn5, EffectFn6, runEffectFn6 )
-import FFI.Simple ((...), (..), delay, args2, args3, args4, args5, setProperty)
+import FFI.Simple (args2, args3, args4, args5, delay, (...))
 import FFI.Simple.PseudoArray as Array
-import DOM.Simple.Console 
 import Reactix.Utils (tuple, currySecond, hook, splay1, splay2, splay3, splay4, splay5)
-import Reactix.React (Context, Ref, Hooks, react, unsafeHooksEffect)
+import Reactix.React (Context, Hooks, Ref, react)
 
 --- useState
 
