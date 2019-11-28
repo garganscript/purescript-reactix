@@ -3,33 +3,23 @@ module Reactix.React.Spec where
 import Prelude
 import Data.Array as A
 import Data.Array ( (!!) )
-import Data.EuclideanRing (mod)
 import Data.Maybe ( Maybe(..) )
-import Data.Nullable (null)
-import Data.Traversable ( traverse, traverse_, sequence_ )
-import Data.Tuple ( Tuple(..) )
+import Data.Traversable (sequence_, traverse_)
 import Data.Tuple.Nested ( (/\) )
 import Data.Unfoldable (fromMaybe)
-import Effect ( Effect )
-import Effect.Aff ( Aff, launchAff )
+import Effect.Aff (Aff)
 import Effect.Class ( liftEffect )
 import Effect.Ref as Ref
-import Effect.Uncurried ( EffectFn1, mkEffectFn1, runEffectFn1 )
 -- import Effect.Aff (launchAff_)
 import Test.Spec ( Spec, describe, it )
 import Test.Spec.Assertions ( shouldEqual )
 -- import Test.Spec.QuickCheck (quickCheck')
-import DOM.Simple as DOM
-import DOM.Simple.Document as Document
 import DOM.Simple.Element as Element
-import DOM.Simple.Node as Node
-import DOM.Simple.Event as Event
 import DOM.Simple.Types (Element)
 import FFI.Simple (delay)
 import Reactix as R
 import Reactix.Test as RT
-import Reactix.DOM.HTML ( button, div, i, text )
-import DOM.Simple.Console
+import Reactix.DOM.HTML as H
 
 staticTest :: Spec Unit
 staticTest =
@@ -59,9 +49,9 @@ staticTest =
       (Element.name <$> children) `shouldEqual` ["I", "I"]
       (Element.innerHTML <$> children) `shouldEqual` ["hello","world"]
    where
-     simple = i {} [ text "hello world" ]
-     magic = div {aria: {label: "example"}, "data": {sample: "example"}} []
-     frag = i {} [ text "hello" ] <> i {} [ text "world" ]
+     simple = H.i {} [ H.text "hello world" ]
+     magic = H.div {aria: {label: "example"}, "data": {sample: "example"}} []
+     frag = H.i {} [ H.text "hello" ] <> H.i {} [ H.text "world" ]
 
 getAttr :: String -> Element -> Maybe String
 getAttr = flip Element.attr
@@ -73,9 +63,9 @@ counterCpt = R.hooksComponent "Counter" cpt
   where
     cpt {count} _ = do
       y /\ setY <- R.useState' count
-      pure $ div { className: "counter" }
-        [ button { type: "button", on: { click: \_ -> setY (_ + 1) } } [ text "++" ]
-        , div {} [ text (show y) ] ]
+      pure $ H.div { className: "counter" }
+        [ H.button { type: "button", on: { click: \_ -> setY (_ + 1) } } [ H.text "++" ]
+        , H.div {} [ H.text (show y) ] ]
 
 counterTest :: Spec Unit
 counterTest =
@@ -114,10 +104,10 @@ bicounterCpt = R.hooksComponent "Bicounter" cpt
   where
     cpt {count} _ = do
       y /\ reduceY <- R.useReducer' reduce count
-      pure $ div { className: "counter" }
-        [ button { type: "button",  on: { click: \_ -> reduceY Inc } } [ text "++" ]
-        , button { type: "button",  on: { click: \_ -> reduceY Dec } } [ text "--" ]
-        , div {} [ text (show y) ] ]
+      pure $ H.div { className: "counter" }
+        [ H.button { type: "button",  on: { click: \_ -> reduceY Inc } } [ H.text "++" ]
+        , H.button { type: "button",  on: { click: \_ -> reduceY Dec } } [ H.text "--" ]
+        , H.div {} [ H.text (show y) ] ]
     reduce count Inc = count + 1
     reduce count Dec = count - 1
 
@@ -171,7 +161,7 @@ effectorCpt = R.hooksComponent "Effector" cpt
           R.useEffect $ do
             Ref.write Initialised stateRef
             pure $ Ref.write Done stateRef
-          pure $ div {} []
+          pure $ H.div {} []
 
 -- TODO: test it's firing at the right time
 effectorTest :: Spec Unit
@@ -199,7 +189,7 @@ layoutEffectorCpt = R.hooksComponent "LayoutEffector" cpt
           R.useLayoutEffect $ do
             Ref.write Initialised stateRef
             pure $ delay unit $ \_ -> Ref.write Done stateRef
-          pure $ div {} []
+          pure $ H.div {} []
 
 -- TODO: test it's firing at the right time
 layoutEffectorTest :: Spec Unit
@@ -236,7 +226,7 @@ themedCpt = R.hooksComponent "Themed" cpt
   where
     cpt {theme} _ = do
       theme' <- R.useContext theme
-      pure $ div {} [ text (showTheme theme') ]
+      pure $ H.div {} [ H.text (showTheme theme') ]
 
 themeChooserCpt :: R.Component ThemeChooserProps
 themeChooserCpt = R.hooksComponent "ThemeChooser" cpt
@@ -246,16 +236,16 @@ themeChooserCpt = R.hooksComponent "ThemeChooser" cpt
       ref <- R.useRef $ R.createContext Nothing
       let context = R.readRef ref
       pure $
-        div {}
-        [ button
+        H.div {}
+        [ H.button
             { type: "button",  on: {click: \_ ->  setTheme (const Nothing) } }
-            [ text "None" ]
-        , button
+            [ H.text "None" ]
+        , H.button
             { type: "button",  on: {click: \_ ->  setTheme (const $ Just Dark) } }
-            [ text "Dark" ]
-        , button
+            [ H.text "Dark" ]
+        , H.button
             { type: "button",  on: {click: \_ -> setTheme (const $ Just Light) } }
-            [ text "Light" ]
+            [ H.text "Light" ]
         , R.provideContext context theme [ R.createElement themedCpt { theme: context } [] ] ]
 
 themeChooserTest :: Spec Unit
