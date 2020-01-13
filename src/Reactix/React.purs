@@ -8,7 +8,7 @@ module Reactix.React
   , Provider, provider, provide
   , Consumer, consumer, consume
   , createPortal
-  
+
   , class IsComponent
   , Component, createElement, createDOMElement
   , staticComponent, hooksComponent
@@ -64,7 +64,7 @@ instance bindHooks :: Bind Hooks where
   bind (Hooks a) f = Hooks (a >>= (runHooks <<< f))
 
 instance monadHooks :: Monad Hooks
-  
+
 unsafeHooksEffect :: forall a. Effect a -> Hooks a
 unsafeHooksEffect = Hooks
 
@@ -92,7 +92,7 @@ type StaticComponent props = Record props -> Array Element -> Element
 
 -- | Turns a `StaticComponent` function into a Component
 staticComponent :: forall props. String -> StaticComponent props -> Component props
-staticComponent name c = Component $ named name $ mkEffectFn1 c' 
+staticComponent name c = Component $ named name $ mkEffectFn1 c'
   where
     c' :: Record props -> Effect Element
     c' props = pure $ c props (children props)
@@ -234,4 +234,3 @@ isValid a = react ... "isValidElement" $ [ a ]
 
 children :: forall a. a -> Array Element
 children a = react .. "Children" ... "toArray" $ [ (a .. "children") ]
-
