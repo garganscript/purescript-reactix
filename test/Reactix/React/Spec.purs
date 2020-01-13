@@ -10,10 +10,8 @@ import Data.Unfoldable (fromMaybe)
 import Effect.Aff (Aff)
 import Effect.Class ( liftEffect )
 import Effect.Ref as Ref
--- import Effect.Aff (launchAff_)
 import Test.Spec ( Spec, describe, it )
 import Test.Spec.Assertions ( shouldEqual )
--- import Test.Spec.QuickCheck (quickCheck')
 import DOM.Simple.Element as Element
 import DOM.Simple.Types (Element)
 import FFI.Simple (delay)
