@@ -26,7 +26,7 @@ ucFirst = help <<< splitAt 1
   where help {before, after} = toUpper before <> after
 
 -- I'm not quite sure of the type of this. Purescript "helpfully" says it's:
--- forall t202 t203 t205 t206. (t203 -> t205 -> t206) -> (t202 -> t203) -> ... -> ...
+onemore :: forall t24 t25 t27 t28. (t25 -> t27 -> t28) -> (t24 -> t25) -> (t24 -> t27) -> t24 -> t28
 onemore s f g a = s (f a) (g a)
 
 -- Aka the `s` combinator from the SKI calculus
