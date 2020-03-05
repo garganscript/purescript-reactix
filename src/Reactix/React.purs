@@ -11,6 +11,7 @@ module Reactix.React
 
   , class IsComponent
   , Component, createElement, createDOMElement
+  , rawCreateElement
   , staticComponent, hooksComponent
   , fragment
 
