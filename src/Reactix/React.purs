@@ -101,8 +101,8 @@ staticComponent name c = Component $ named name $ mkEffectFn1 c'
     c' :: Record props -> Effect Element
     c' props = pure $ c props (children props)
 
-staticComponentWithModule :: forall props. Module -> String -> StaticComponent props -> R.Component props
-staticComponentWithModule module' name c = R.staticComponent (module' <> "." <> name) c
+staticComponentWithModule :: forall props. Module -> String -> StaticComponent props -> Component props
+staticComponentWithModule module' name c = staticComponent (module' <> "." <> name) c
 
 -- | The type of a function that can be turned into a component with
 -- | `hooksComponent`. Will have access to the `Hooks` Monad.
@@ -115,7 +115,7 @@ hooksComponent name c = Component $ named name $ mkEffectFn1 c'
     c' :: Record props -> Effect Element
     c' props = runHooks $ c props (children props)
 
-hooksComponentWithModule :: forall props. Module -> String -> HooksComponent props -> R.Component props
+hooksComponentWithModule :: forall props. Module -> String -> HooksComponent props -> Component props
 hooksComponentWithModule module' name c = hooksComponent (module' <> "." <> name) c
 
 rawCreateElement :: forall c p cs. c -> p -> Array cs -> Element
