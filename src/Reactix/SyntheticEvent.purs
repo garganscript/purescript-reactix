@@ -6,8 +6,15 @@ import DOM.Simple as DOM
 import DOM.Simple.Event (class HasModifierKeys, class IsEvent, class IsMouseEvent, KeyboardEvent, MouseButtonEvent)
 import Effect ( Effect )
 import FFI.Simple ( (..), (...), delay )
+import Unsafe.Coerce (unsafeCoerce)
 
 foreign import data SyntheticEvent :: Type -> Type
+
+unsafeEventValue :: forall event. event -> String
+unsafeEventValue e = (unsafeCoerce e).target.value
+
+unsafeEventTarget :: forall event. event -> DOM.Element
+unsafeEventTarget e = (unsafeCoerce e).target
 
 bubbles :: forall e. IsEvent e => SyntheticEvent e -> Boolean
 bubbles e = e .. "bubbles"

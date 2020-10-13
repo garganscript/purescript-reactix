@@ -1,5 +1,5 @@
 module Reactix.Hooks
-  ( State, useState, useState'
+  ( State, Setter, useState, useState'
   , Reducer, useReducer, useReducer'
   , useContext
   , useRef
@@ -48,6 +48,9 @@ delayEffect = delay
 
 -- | A state hook is a tuple of value and setter
 type State state = Tuple state ((state -> state) -> Effect Unit)
+
+-- a setter function, for useState
+type Setter t = (t -> t) -> Effect Unit
 
 -- | Given an Effect function returning an initial value, returns a State
 useState :: forall s. (Unit -> s) -> Hooks (State s)
