@@ -217,13 +217,13 @@ createRef _ = react ... "createRef" $ []
 readRef :: forall r. Ref r -> r
 readRef r = r .. "current"
 
-readRefM :: forall m. Monad m -> Ref r -> m r
+readRefM :: forall r m. Monad m => Ref r -> m r
 readRefM r = delay r (pure <<< readRef)
 
 readNullableRef :: forall r. Ref (Nullable r) -> Maybe r
 readNullableRef r = toMaybe $ r .. "current"
 
-readNullableRefM :: forall r. Ref (Nullable r) -> Effect (Maybe r)
+readNullableRefM :: forall r m. Monad m => Ref (Nullable r) -> Effect (Maybe r)
 readNullableRefM r = delay r (pure <<< readNullableRef)
 
 setRef :: forall r. Ref r -> r -> Effect Unit
