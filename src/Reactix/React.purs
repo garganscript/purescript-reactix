@@ -25,6 +25,7 @@ module Reactix.React
  where
 
 import Prelude
+import Control.Monad (Monad)
 import Data.Function.Uncurried (mkFn2)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
