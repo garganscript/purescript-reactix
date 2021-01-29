@@ -1,5 +1,5 @@
 module Reactix.Hooks
-  ( State, useState, useState'
+  ( State, Setter, useState, useState'
   , Reducer, useReducer, useReducer'
   , useContext
   , useRef
@@ -42,14 +42,21 @@ import Reactix.React (Context, Hooks, Ref, react)
 
 --- useState
 
+-- delay concretely typed to Effect
+delayEffect :: forall a b. a -> (a -> Effect b) -> Effect b
+delayEffect = delay
+
 -- | A state hook is a tuple of value and setter
 type State state = Tuple state ((state -> state) -> Effect Unit)
+
+-- a setter function, for useState
+type Setter t = (t -> t) -> Effect Unit
 
 -- | Given an Effect function returning an initial value, returns a State
 useState :: forall s. (Unit -> s) -> Hooks (State s)
 useState s =
   hook $ \_ ->
-    pure $ currySecond $ tuple $ react ... "useState" $ [ delay unit (pure <<< s) ]
+    pure $ currySecond $ tuple $ react ... "useState" $ [ delayEffect unit (pure <<< s) ]
 
 useState' :: forall s. s -> Hooks (State s)
 useState' = useState <<< const
@@ -317,7 +324,7 @@ useLayoutEffectFn5' a b c d e f = splay5 useLayoutEffect5' f a b c d e
 
 -- | Given a function to compute an expensive value, returns the value
 useMemo :: forall t. (Unit -> t) -> Hooks t
-useMemo f = hook $ \_ -> pure $ react ... "useMemo" $ [ delay unit (\_ -> pure (f unit)) ]
+useMemo f = hook $ \_ -> pure $ react ... "useMemo" $ [ delayEffect unit (\_ -> pure (f unit)) ]
 
 -- | Like `useMemo` but takes a memo value
 useMemo1 :: forall a t. a -> (Unit -> t) -> Hooks t
@@ -346,13 +353,13 @@ unsafeUseMemo :: forall t a. (Unit -> t) -> a -> Hooks t
 unsafeUseMemo f a =
   hook $ \_ ->
     pure $ react ... "useMemo" $
-      args2 (delay unit (\_ -> pure (f unit))) (Array.from a)
+      args2 (delayEffect unit (\_ -> pure (f unit))) (Array.from a)
 
 -- useCallback
 
 -- | Given a function to compute an expensive value, returns the value
 useCallback :: forall t. (Unit -> t) -> Hooks (Effect t)
-useCallback f = hook $ \_ -> pure $ react ... "useCallback" $ [ delay unit (\_ -> pure (f unit)) ]
+useCallback f = hook $ \_ -> pure $ react ... "useCallback" $ [ delayEffect unit (\_ -> pure (f unit)) ]
 
 -- | Like `useCallback` but takes a memo value
 useCallback1 :: forall a t. a -> (Unit -> t) -> Hooks (Effect t)

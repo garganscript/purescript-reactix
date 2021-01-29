@@ -1,19 +1,16 @@
 module Test.Main where
 
 import Prelude
+
 import Effect (Effect)
-import Test.Spec (Spec, describe, it)
-import Test.Spec.Assertions (shouldEqual)
-import Test.Spec.Mocha (runMocha)
-import Reactix.React.Spec
-import Test.Spec.Runner (run)
-
+import Effect.Aff (Aff)
 import Reactix.React.Spec as ReactSpec
+import Test.Spec (SpecT)
+import Test.Spec.Mocha (runMocha)
 
-specs :: Spec Unit
+specs :: SpecT Aff Unit Effect Unit
 specs = do ReactSpec.spec
 
 main :: Effect Unit
-main = do --  >>= run [consoleReporter]
-  -- specs <- discoverSpecs
+main = do
   runMocha specs

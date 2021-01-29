@@ -1,27 +1,29 @@
 module Reactix.React.Spec where
 
 import Prelude
-import Data.Array as A
-import Data.Array ( (!!) )
-import Data.Maybe ( Maybe(..) )
-import Data.Traversable (sequence_, traverse_)
-import Data.Tuple.Nested ( (/\) )
-import Data.Unfoldable (fromMaybe)
-import Effect.Aff (Aff)
-import Effect.Class ( liftEffect )
-import Effect.Ref as Ref
--- import Effect.Aff (launchAff_)
-import Test.Spec ( Spec, describe, it )
-import Test.Spec.Assertions ( shouldEqual )
--- import Test.Spec.QuickCheck (quickCheck')
+
 import DOM.Simple.Element as Element
 import DOM.Simple.Types (Element)
+import Data.Array ((!!))
+import Data.Array as A
+import Data.Maybe (Maybe(..))
+import Data.Traversable (sequence_, traverse_)
+import Data.Tuple.Nested ((/\))
+import Data.Unfoldable (fromMaybe)
+import Effect (Effect)
+import Effect.Aff (Aff)
+import Effect.Class (liftEffect)
+import Effect.Ref as Ref
 import FFI.Simple (delay)
 import Reactix as R
-import Reactix.Test as RT
 import Reactix.DOM.HTML as H
+import Reactix.Test as RT
+import Test.Spec (SpecT, describe, it)
+import Test.Spec.Assertions (shouldEqual)
 
-staticTest :: Spec Unit
+type Spec = SpecT Aff Unit Effect Unit
+
+staticTest :: Spec
 staticTest =
   describe "Basic DOM rendering" $ do
     it "Simple elements" $ do
@@ -67,7 +69,7 @@ counterCpt = R.hooksComponent "Counter" cpt
         [ H.button { type: "button", on: { click: \_ -> setY (_ + 1) } } [ H.text "++" ]
         , H.div {} [ H.text (show y) ] ]
 
-counterTest :: Spec Unit
+counterTest :: Spec
 counterTest =
   describe "Counter" do
     it "Works for plain components" $ do
@@ -111,7 +113,7 @@ bicounterCpt = R.hooksComponent "Bicounter" cpt
     reduce count Inc = count + 1
     reduce count Dec = count - 1
 
-bicounterTest :: Spec Unit
+bicounterTest :: Spec
 bicounterTest =
   describe "Bicounter" do
     it "Works for plain components" $ do
@@ -143,7 +145,7 @@ bicounterTest =
       let children5 = Element.children root.container >>= Element.children
       A.length children5 `shouldEqual` 3
       (Element.innerHTML <$> children4) `shouldEqual` ["++", "--", "1"]
-          
+
 data EffectorState = Fresh | Initialised | Done
 
 derive instance eqEffectorState :: Eq EffectorState
@@ -164,7 +166,7 @@ effectorCpt = R.hooksComponent "Effector" cpt
           pure $ H.div {} []
 
 -- TODO: test it's firing at the right time
-effectorTest :: Spec Unit
+effectorTest :: Spec
 effectorTest =
   describe "Effector" do
     it "Works for plain components" $
@@ -192,7 +194,7 @@ layoutEffectorCpt = R.hooksComponent "LayoutEffector" cpt
           pure $ H.div {} []
 
 -- TODO: test it's firing at the right time
-layoutEffectorTest :: Spec Unit
+layoutEffectorTest :: Spec
 layoutEffectorTest =
   describe "LayoutEffector" do
     it "Works for plain components" $
@@ -248,13 +250,13 @@ themeChooserCpt = R.hooksComponent "ThemeChooser" cpt
             [ H.text "Light" ]
         , R.provideContext context theme [ R.createElement themedCpt { theme: context } [] ] ]
 
-themeChooserTest :: Spec Unit
+themeChooserTest :: Spec
 themeChooserTest =
   describe "ThemeChooser" do
     it "Works for plain components" $ do
       let themeChooser = R.createElement themeChooserCpt {} []
       liftEffect (RT.render themeChooser) >>= test
-  where 
+  where
     test root = do
       let children = Element.children root.container
       A.length children `shouldEqual` 1
@@ -274,8 +276,8 @@ themeChooserTest =
       let children5 = (Element.children root.container) >>= Element.children
       A.length children5 `shouldEqual` 4
       (Element.innerHTML <$> children5) `shouldEqual` ["None", "Dark", "Light", "light"]
-      
-    
+
+
 -- type FizzBuzzProps = ( context :: R.Context Int )
 
 -- fizzBuzzCpt :: R.Component FizzBuzzProps
@@ -295,7 +297,7 @@ themeChooserTest =
 --       | count `mod` 5 == 0 = "Buzz"
 --       | true = show count
 
--- fizzBuzzTest :: Spec Unit
+-- fizzBuzzTest :: Spec
 -- fizzBuzzTest =
 --   describe "FizzBuzz" do
 --     it "Works for plain components" $
@@ -306,19 +308,19 @@ themeChooserTest =
 --     test :: forall cpt. R.IsComponent cpt FizzBuzzProps (Array R.Element) => cpt -> Aff Unit
 --     test cpt = do
 --       let context = R.createContext 0
-    
+
 --       pure unit
-    
 
--- memoTest :: Spec Unit
--- callbackTest :: Spec Unit
--- imperativeHandleTest :: Spec Unit
--- debugValueTest :: Spec Unit
 
--- listTest :: Spec Unit
+-- memoTest :: Spec
+-- callbackTest :: Spec
+-- imperativeHandleTest :: Spec
+-- debugValueTest :: Spec
+
+-- listTest :: Spec
 -- listTest = pure unit
 
-spec :: Spec Unit
+spec :: SpecT Aff Unit Effect Unit
 spec = sequence_
   [ staticTest
   , counterTest        -- useState

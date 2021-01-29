@@ -8,10 +8,12 @@ module Reactix.React
   , Provider, provider, provide
   , Consumer, consumer, consume
   , createPortal
-  
+
   , class IsComponent
   , Component, createElement, createDOMElement
-  , staticComponent, hooksComponent
+  , rawCreateElement
+  , StaticComponent, staticComponent, staticComponentWithModule
+  , HooksComponent, hooksComponent, hooksComponentWithModule
   , fragment
 
   , Ref, createRef, readRef, readRefM, readNullableRef, readNullableRefM, setRef
@@ -64,7 +66,7 @@ instance bindHooks :: Bind Hooks where
   bind (Hooks a) f = Hooks (a >>= (runHooks <<< f))
 
 instance monadHooks :: Monad Hooks
-  
+
 unsafeHooksEffect :: forall a. Effect a -> Hooks a
 unsafeHooksEffect = Hooks
 
@@ -88,14 +90,19 @@ instance consumerIsComponent :: IsComponent (Consumer v) () (v -> Element) where
 -- | The type of a function that can be turned into a component with
 -- | `staticComponent`. Will not have access to the `Hooks` Monad.
 
+type Module = String
+
 type StaticComponent props = Record props -> Array Element -> Element
 
 -- | Turns a `StaticComponent` function into a Component
 staticComponent :: forall props. String -> StaticComponent props -> Component props
-staticComponent name c = Component $ named name $ mkEffectFn1 c' 
+staticComponent name c = Component $ named name $ mkEffectFn1 c'
   where
     c' :: Record props -> Effect Element
     c' props = pure $ c props (children props)
+
+staticComponentWithModule :: forall props. Module -> String -> StaticComponent props -> Component props
+staticComponentWithModule module' name c = staticComponent (module' <> "." <> name) c
 
 -- | The type of a function that can be turned into a component with
 -- | `hooksComponent`. Will have access to the `Hooks` Monad.
@@ -107,6 +114,9 @@ hooksComponent name c = Component $ named name $ mkEffectFn1 c'
   where
     c' :: Record props -> Effect Element
     c' props = runHooks $ c props (children props)
+
+hooksComponentWithModule :: forall props. Module -> String -> HooksComponent props -> Component props
+hooksComponentWithModule module' name c = hooksComponent (module' <> "." <> name) c
 
 rawCreateElement :: forall c p cs. c -> p -> Array cs -> Element
 rawCreateElement c p cs = react ... "createElement" $ args
@@ -240,4 +250,3 @@ isValid a = react ... "isValidElement" $ [ a ]
 
 children :: forall a. a -> Array Element
 children a = react .. "Children" ... "toArray" $ [ (a .. "children") ]
-
