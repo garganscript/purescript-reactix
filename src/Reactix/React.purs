@@ -14,7 +14,7 @@ module Reactix.React
   , staticComponent, hooksComponent
   , fragment
 
-  , Ref, createRef, readRef, readNullableRef, setRef
+  , Ref, createRef, readRef, readRefM, readNullableRef, readNullableRefM, setRef
 
   , isValid
 
@@ -138,7 +138,7 @@ instance monoidElement :: Monoid Element where
 
 -- | Renders a React Element to a real Element
 render :: Element -> DOM.Element -> Effect Unit
-render e d = delay unit $ \_ -> reactDOM ... "render" $ args2 e d
+render e d = delay unit $ \_ -> pure $ reactDOM ... "render" $ args2 e d
 
 createPortal :: Array Element -> DOM.Element -> Element
 createPortal es e = reactDOM ... "createPortal" $ args2 es e
@@ -206,8 +206,14 @@ createRef _ = react ... "createRef" $ []
 readRef :: forall r. Ref r -> r
 readRef r = r .. "current"
 
+readRefM :: forall m. Monad m -> Ref r -> m r
+readRefM r = delay r (pure <<< readRef)
+
 readNullableRef :: forall r. Ref (Nullable r) -> Maybe r
 readNullableRef r = toMaybe $ r .. "current"
+
+readNullableRefM :: forall r. Ref (Nullable r) -> Effect (Maybe r)
+readNullableRefM r = delay r (pure <<< readNullableRef)
 
 setRef :: forall r. Ref r -> r -> Effect Unit
 setRef r v = delay unit $ \_ -> (pure $ r .= "current" $ v) *> pure unit

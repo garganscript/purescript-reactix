@@ -151,7 +151,7 @@ let additions =
           , "spec-mocha"
           , "unsafe-coerce"
           ]
-          "https://github.com/irresponsible/purescript-dom-simple"
+          "https://github.com/poorscript/purescript-dom-simple"
           "v0.2.1"
       , ffi-simple =
           mkPackage
@@ -162,8 +162,8 @@ let additions =
           , "nullable"
           , "unsafe-coerce"
           ]
-          "https://github.com/irresponsible/purescript-ffi-simple"
-          "v0.2.4"
+          "https://github.com/poorscript/purescript-ffi-simple"
+          "v0.2.5"
       , inflection =
           mkPackage
           [ "functions" ]

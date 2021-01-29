@@ -77,7 +77,14 @@ Not in any particular order
   * Test useImperativeHandle
   * Test useDebugValue
   * Test React.isValid
-5. Move to `Aff` instead of `Effect`
+5. Setter - a shorthand for setter functions
+6. Reductor - a reducer that lives in Effect
+  1. Actor - a shorthand for the transformer
+7. Stator - a state that lives in Effect
+
+Ideas we're not yet convinced on:
+
+* Move to `Aff` instead of `Effect` (not currently convinced)
 
 ## Changelog
 
