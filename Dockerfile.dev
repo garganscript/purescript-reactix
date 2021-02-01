@@ -1,0 +1,7 @@
+FROM node:current-buster-slim
+
+ENV CWD=/opt/app HOME=/opt/app TERM=xterm
+RUN apt-get update && apt-get install -y libgmp10 libtinfo5 git
+WORKDIR /opt/app
+EXPOSE 5000/tcp
+CMD ["bash"]

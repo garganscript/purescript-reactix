@@ -1,0 +1,16 @@
+version: "3.5"
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: "Dockerfile.dev"
+    stdin_open: true
+    tty: true
+    user: $UID:$GID
+    ports:
+      - 5000:5000
+    volumes:
+      - .:/opt/app
+      - /etc/group:/etc/group:ro
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/shadow:/etc/shadow:ro
