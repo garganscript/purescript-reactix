@@ -1,7 +1,7 @@
 {
   "name": "reactix",
   "set": "local",
-  "source": ".psc-package",
+  "source": ".psc-package/local/.set/packages.json",
   "depends":
     [ "aff"
     , "dom-simple"

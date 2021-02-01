@@ -16,6 +16,7 @@ module Reactix.React
   , HooksComponent, hooksComponent, hooksComponentWithModule
   , fragment
 
+  , class MonadDelay
   , Ref, createRef, readRef, readRefM, readNullableRef, readNullableRefM, setRef
 
   , isValid
@@ -25,7 +26,7 @@ module Reactix.React
  where
 
 import Prelude
-import Control.Monad (Monad)
+import Control.Monad (class Monad)
 import Data.Function.Uncurried (mkFn2)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
@@ -70,6 +71,15 @@ instance monadHooks :: Monad Hooks
 
 unsafeHooksEffect :: forall a. Effect a -> Hooks a
 unsafeHooksEffect = Hooks
+
+-- | This class is for Monads whose side effect includes delayed
+-- | computation. So far, it's Effect and Hooks.
+class (Monad m) <= MonadDelay m
+
+instance monadDelayEffect :: MonadDelay Effect
+
+instance monadDelayHooks :: MonadDelay Hooks
+
 
 type DOMProps = ()
 
@@ -217,13 +227,13 @@ createRef _ = react ... "createRef" $ []
 readRef :: forall r. Ref r -> r
 readRef r = r .. "current"
 
-readRefM :: forall r m. Monad m => Ref r -> m r
+readRefM :: forall r m. MonadDelay m => Ref r -> m r
 readRefM r = delay r (pure <<< readRef)
 
 readNullableRef :: forall r. Ref (Nullable r) -> Maybe r
 readNullableRef r = toMaybe $ r .. "current"
 
-readNullableRefM :: forall r m. Monad m => Ref (Nullable r) -> Effect (Maybe r)
+readNullableRefM :: forall r m. MonadDelay m => Ref (Nullable r) -> Effect (Maybe r)
 readNullableRefM r = delay r (pure <<< readNullableRef)
 
 setRef :: forall r. Ref r -> r -> Effect Unit
