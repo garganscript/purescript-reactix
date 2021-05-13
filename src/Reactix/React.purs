@@ -33,6 +33,7 @@ import Data.Nullable (Nullable, toMaybe)
 import Effect (Effect)
 import Effect.Uncurried (EffectFn1, mkEffectFn1)
 import DOM.Simple as DOM
+import DOM.Simple.Types (class IsElement)
 import FFI.Simple.PseudoArray as PA
 import FFI.Simple (args2, defineProperty, delay, (..), (...), (.=))
 
@@ -48,6 +49,8 @@ newtype Component props = Component (EffectFn1 (Record props) Element)
 
 -- | A React Element node
 foreign import data Element :: Type
+
+instance reactElementIsElement :: IsElement Element
 
 -- | The Hooks monad
 newtype Hooks a = Hooks (Effect a)
