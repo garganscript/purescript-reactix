@@ -1,12 +1,9 @@
-let mkPackage =
-      https://raw.githubusercontent.com/purescript/package-sets/ea2423043df6c90f0de754977923b6c5dfdddcfc/src/mkPackage.dhall sha256:0b197efa1d397ace6eb46b243ff2d73a3da5638d8d0ac8473e8e4a8fc528cf57
-
 let upstream =
-      https://github.com/purescript/package-sets/releases/download/psc-0.13.8-20210118/packages.dhall sha256:a59c5c93a68d5d066f3815a89f398bcf00e130a51cb185b2da29b20e2d8ae115
+      https://github.com/purescript/package-sets/releases/download/psc-0.14.2-20210629/packages.dhall sha256:534c490bb73cae75adb5a39871142fd8db5c2d74c90509797a80b8bb0d5c3f7b
 
 let additions =
       { dom-simple =
-          mkPackage
+        { dependencies =
             [ "console"
             , "effect"
             , "functions"
@@ -16,10 +13,11 @@ let additions =
             , "spec-mocha"
             , "unsafe-coerce"
             ]
-            "https://github.com/poorscript/purescript-dom-simple"
-            "v0.2.7"
+        , repo = "https://github.com/poorscript/purescript-dom-simple"
+        , version = "v0.2.7"
+	}
       , ffi-simple =
-          mkPackage
+        { dependencies =
             [ "prelude"
             , "effect"
             , "maybe"
@@ -27,18 +25,21 @@ let additions =
             , "nullable"
             , "unsafe-coerce"
             ]
-            "https://github.com/poorscript/purescript-ffi-simple"
-            "v0.2.10"
+        , repo = "https://github.com/poorscript/purescript-ffi-simple"
+        , version = "v0.2.10"
+	}
       , inflection =
-          mkPackage
+        { dependencies =
             [ "functions" ]
-            "https://github.com/athanclark/purescript-inflection"
-            "v1.0.0"
+        , repo = "https://github.com/athanclark/purescript-inflection"
+        , version = "v1.0.0"
+	}
       , spec-mocha =
-          mkPackage
+        { dependencies =
             [ "console", "foldable-traversable", "exceptions", "spec" ]
-            "https://github.com/purescript-spec/purescript-spec-mocha"
-            "v4.0.0"
+        , repo = "https://github.com/purescript-spec/purescript-spec-mocha"
+        , version = "v4.0.0"
+	}
       }
 
 in  upstream // additions
