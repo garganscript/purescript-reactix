@@ -1,4 +1,4 @@
 'use strict';
-exports.react = module.require("react");
-exports.reactDOM = module.require('react-dom');
+exports.react = require("react");
+exports.reactDOM = require('react-dom');
 
