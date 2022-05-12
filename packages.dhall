@@ -33,7 +33,7 @@ let additions =
           , "tuples"
           , "unsafe-coerce"
           , "unsafe-reference" ]
-        , repo = "https://github.com/irresponsible/purescript-ffi-simple"
+        , repo = "https://github.com/garganscript/purescript-ffi-simple"
         , version = "v0.3.1"
         }
       , inflection =
