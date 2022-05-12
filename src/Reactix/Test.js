@@ -1,3 +1,7 @@
 'use strict';
-exports.testUtils = require('react-dom/test-utils');
-exports.testingLibrary = require('@testing-library/react');
+
+import * as TestUtils from 'react-dom/test-utils';
+import * as TestingLibrary from '@testing-library/react';
+
+export let testUtils = TestUtils;
+export let testingLibrary = TestingLibrary;

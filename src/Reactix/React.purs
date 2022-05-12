@@ -83,7 +83,7 @@ instance monadDelayHooks :: MonadDelay Hooks
 
 type DOMProps = ()
 
-class IsComponent component (props :: # Type) children
+class IsComponent component (props :: Row Type) children
   | component -> props, component -> children where
   createElement :: component -> Record props -> children -> Element
 
@@ -168,7 +168,7 @@ createPortal es e = reactDOM ... "createPortal" $ args2 es e
 
 -- -- Memoisation
 
-foreign import data Memo :: # Type -> Type
+foreign import data Memo :: Row Type -> Type
 
 memo ::
   forall props.

@@ -1,4 +1,8 @@
 'use strict';
-exports.react = require("react");
-exports.reactDOM = require('react-dom');
+
+import * as React from 'react';
+import * as ReactDom from 'react-dom';
+
+export let react = React;
+export let reactDOM = ReactDom;
 
