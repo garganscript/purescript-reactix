@@ -96,6 +96,15 @@ Ideas we're not yet convinced on:
 <!-- * `R.React.provide` - provider a value through a `Provider` -->
 <!-- * `R.React.consume` - consume a value through a `Consumer` -->
 
+## 0.5.0
+
+Changed:
+
+* Migrate to purescript 0.15.0
+* add `test.dhall` to keep purely test dependencies. See
+  https://github.com/purescript/spago#devdependencies-testdependencies-or-in-general-a-situation-with-many-configurations
+  for more info
+
 ### 0.4.2
 
 New:

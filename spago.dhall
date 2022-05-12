@@ -4,9 +4,7 @@ You can edit this file as you like.
 -}
 { name = "reactix"
 , dependencies =
-  [ "aff"
-  , "arrays"
-  , "dom-simple"
+  [ "dom-simple"
   , "effect"
   , "ffi-simple"
   , "foldable-traversable"
@@ -14,15 +12,10 @@ You can edit this file as you like.
   , "maybe"
   , "nullable"
   , "prelude"
-  , "psci-support"
-  , "refs"
-  , "spec"
-  , "spec-mocha"
   , "strings"
   , "tuples"
-  , "unfoldable"
   , "unsafe-coerce"
   ]
 , packages = ./packages.dhall
-, sources = [ "src/**/*.purs", "test/**/*.purs" ]
+, sources = [ "src/**/*.purs" ]
 }
