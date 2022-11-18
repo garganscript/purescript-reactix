@@ -1,6 +1,5 @@
 let upstream =
-      https://github.com/garganscript/package-sets/releases/download/v0.1.3/release.dhall
-        sha256:c9baf942dc812fbcc9c8d505bac6778643eeacaa31c6f8df7411f6ae0788c684
+      https://github.com/garganscript/package-sets/releases/download/v0.1.4/release.dhall sha256:e03eafe0c7ea0ac143d07ec6d9f20c804bd6b6f95a8d89bf287c279e770584c8
 
 let additions =
       { inflection =
@@ -10,4 +9,4 @@ let additions =
         }
       }
 
-in  upstream // additions
+in  upstream ⫽ additions

@@ -96,6 +96,12 @@ Ideas we're not yet convinced on:
 <!-- * `R.React.provide` - provider a value through a `Provider` -->
 <!-- * `R.React.consume` - consume a value through a `Consumer` -->
 
+## 0.5.1
+
+Changed:
+
+* Upgrade to react 18.2.0
+
 ## 0.5.0
 
 Changed:
