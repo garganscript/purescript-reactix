@@ -1,12 +1,5 @@
 let upstream =
-      https://github.com/garganscript/package-sets/releases/download/v0.1.4/release.dhall sha256:e03eafe0c7ea0ac143d07ec6d9f20c804bd6b6f95a8d89bf287c279e770584c8
+      https://github.com/garganscript/package-sets/releases/download/v0.1.7/release.dhall
+        sha256:52886309e1f0158a85427f80c1e3d47ce747c5f14fcec671a81fe5c2c711a6db
 
-let additions =
-      { inflection =
-        { dependencies = [ "functions" ]
-        , repo = "https://github.com/athanclark/purescript-inflection"
-        , version = "v1.0.1"
-        }
-      }
-
-in  upstream ⫽ additions
+in  upstream
