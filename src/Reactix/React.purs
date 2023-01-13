@@ -1,6 +1,6 @@
 module Reactix.React
   ( React, react
-  , ReactDOM, reactDOM, render
+  , ReactDOM, reactDOM, ReactDOMRoot, createRoot, render
   , Element
   , Hooks, unsafeHooksEffect, runHooks
 
@@ -31,16 +31,19 @@ import Data.Function.Uncurried (mkFn2)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
 import Effect (Effect)
-import Effect.Uncurried (EffectFn1, mkEffectFn1)
+import Effect.Uncurried (EffectFn1, mkEffectFn1, runEffectFn1, EffectFn2, runEffectFn2)
 import DOM.Simple as DOM
 import FFI.Simple.PseudoArray as PA
-import FFI.Simple (args2, defineProperty, delay, (..), (...), (.=))
+import FFI.Simple (args1, args2, defineProperty, delay, (..), (...), (.=))
 
 foreign import data React :: Type
 foreign import data ReactDOM :: Type
+foreign import data ReactDOMRoot :: Type
 
 foreign import react :: React
 foreign import reactDOM :: ReactDOM
+foreign import _createRoot :: EffectFn1 DOM.Element ReactDOMRoot
+foreign import _render :: EffectFn2 Element ReactDOMRoot Unit
 
 -- basic types
 
@@ -81,6 +84,7 @@ instance monadDelayEffect :: MonadDelay Effect
 instance monadDelayHooks :: MonadDelay Hooks
 
 
+type DOMProps :: forall k. Row k
 type DOMProps = ()
 
 class IsComponent component (props :: Row Type) children
@@ -157,9 +161,14 @@ instance semigroupElement :: Semigroup Element where
 instance monoidElement :: Monoid Element where
   mempty = fragment []
 
+createRoot :: DOM.Element -> Effect ReactDOMRoot
+createRoot = runEffectFn1 _createRoot
+-- createRoot d = delay unit $ \_ -> pure $ reactDOM ... "createRoot" $ args1 d
+
 -- | Renders a React Element to a real Element
-render :: Element -> DOM.Element -> Effect Unit
-render e d = delay unit $ \_ -> pure $ reactDOM ... "render" $ args2 e d
+render :: Element -> ReactDOMRoot -> Effect Unit
+render = runEffectFn2 _render
+--render e r = delay unit $ \_ -> pure $ r ... "render" $ args1 e
 
 createPortal :: Array Element -> DOM.Element -> Element
 createPortal es e = reactDOM ... "createPortal" $ args2 es e
